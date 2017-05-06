@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>c++11 笔记 | 技术之大, 在乎你我心中</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="C++ 11 笔记constexpr 表达式常量表达式是指值不会改变并且在编译过程就能得到计算结果的表达式. 123constexpr int mf = 20;constexpr int limit = mf + 1;constexpr int sz = size(); // 只有当size是一个constexpr函数时, 才是一条正确的声明语句">
+<meta name="keywords" content="c++11">
+<meta property="og:type" content="article">
+<meta property="og:title" content="c++11 笔记">
+<meta property="og:url" content="http://winkyao.github.io/2016/04/06/c-11-笔记/index.html">
+<meta property="og:site_name" content="技术之大, 在乎你我心中">
+<meta property="og:description" content="C++ 11 笔记constexpr 表达式常量表达式是指值不会改变并且在编译过程就能得到计算结果的表达式. 123constexpr int mf = 20;constexpr int limit = mf + 1;constexpr int sz = size(); // 只有当size是一个constexpr函数时, 才是一条正确的声明语句">
+<meta property="og:updated_time" content="2017-05-06T09:34:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="c++11 笔记">
+<meta name="twitter:description" content="C++ 11 笔记constexpr 表达式常量表达式是指值不会改变并且在编译过程就能得到计算结果的表达式. 123constexpr int mf = 20;constexpr int limit = mf + 1;constexpr int sz = size(); // 只有当size是一个constexpr函数时, 才是一条正确的声明语句">
+  
+    <link rel="alternate" href="/atom.xml" title="技术之大, 在乎你我心中" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">技术之大, 在乎你我心中</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-c-11-笔记" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/06/c-11-笔记/" class="article-date">
+  <time datetime="2016-04-06T07:01:08.000Z" itemprop="datePublished">2016-04-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tech/">tech</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      c++11 笔记
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="C-11-笔记"><a href="#C-11-笔记" class="headerlink" title="C++ 11 笔记"></a>C++ 11 笔记</h2><h4 id="constexpr-表达式"><a href="#constexpr-表达式" class="headerlink" title="constexpr 表达式"></a>constexpr 表达式</h4><p>常量表达式是指值不会改变并且在编译过程就能得到计算结果的表达式.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">constexpr int mf = 20;</div><div class="line">constexpr int limit = mf + 1;</div><div class="line">constexpr int sz = size(); // 只有当size是一个constexpr函数时, 才是一条正确的声明语句</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h4 id="using-别名声明"><a href="#using-别名声明" class="headerlink" title="using 别名声明"></a>using 别名声明</h4><p>C++ 11规定了一种新的方法, 使用别名声明来定义类型的别名:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">using SI = Sales_item; </div><div class="line">// 等价于: typedef Sales_item SI;</div></pre></td></tr></table></figure>
+<h4 id="auto-类型说明符"><a href="#auto-类型说明符" class="headerlink" title="auto 类型说明符"></a>auto 类型说明符</h4><p>auto能让编译器去推断表达式所属的类型, 使用auto能在一条语句中声明多个变量, 但是该语句中所有变量的初十基本数据类型都必须一样:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">auto i = 0, *p = &amp;i;    // 正确: i是整数, p是整型指针</div><div class="line">auto sz = 0, pi = 3.14; // 错误: sz和pi的类型不一致</div></pre></td></tr></table></figure></p>
+<h4 id="decltype-类型指示符"><a href="#decltype-类型指示符" class="headerlink" title="decltype 类型指示符"></a>decltype 类型指示符</h4><p>decltype, 它的作用是选择并返回操作数的数据类型. 在此过程中, 编译器分析表达式并得到它的类型, 却不实际计算表达式的值:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">decltype(f()) sum = x; // sum 的类型就是函数f的返回类型</div><div class="line"></div><div class="line">const int ci = 0, &amp;cj = ci;</div><div class="line">decltype(ci) x = 0;  // x的类型是const int</div><div class="line">decltype(cj) y = x;  // y的类型是const int&amp;, y绑定到变量x</div><div class="line">decltype(cj) z;      // 错误: z是一个引用, 必须初始化</div><div class="line"></div><div class="line">int i = 42, *p = &amp;i, &amp;r = i;</div><div class="line">decltype(r + 0) b; // 正确, 表达式的结果是一个具体值而非引用</div><div class="line">decltype(*p) c;    // 错误, 解引用将得到引用类型, 必须初始化</div><div class="line"></div><div class="line">// decltype的表达式如果是加上了括号的变量, 结果将是引用</div><div class="line">decltype((i)) d; // 错误, d是int&amp;, 必须初始化</div><div class="line">decltype(i) e;   // 正确, e是一个int</div></pre></td></tr></table></figure>
+<p>注意: decltype(*p) 解引用操作符会返回一个引用类型.</p>
+<h4 id="for-range"><a href="#for-range" class="headerlink" title="for range"></a>for range</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">std::string str(&quot;some string&quot;);</div><div class="line">for (auto c : str)</div><div class="line">    std::cout &lt;&lt; c &lt;&lt; std::endl;</div></pre></td></tr></table></figure>
+<p>如果要改变循环的值:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">std::string s(&quot;Hello World!!!&quot;);</div><div class="line">for (auto &amp;c : s)</div><div class="line">    c = toupper(c);</div></pre></td></tr></table></figure></p>
+<h4 id="赋值运算符"><a href="#赋值运算符" class="headerlink" title="赋值运算符"></a>赋值运算符</h4><p>C++ 11 允许使用花括号括起来的初始值列表, 作为赋值语句的右侧运算对象:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">vector&lt;int&gt; vi;</div><div class="line">vi = &#123;0, 1, 2, 3, 4&#125;;</div></pre></td></tr></table></figure>
+<h4 id="initializer-list-形参"><a href="#initializer-list-形参" class="headerlink" title="initializer_list 形参"></a>initializer_list 形参</h4><p>如果函数的实参数量未知, 但是全部实参的类型都相同, 可以使用initializer_list类型的形参.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">void error_msg(initializer_list&lt;string&gt; il) &#123;</div><div class="line">    for (const auto &amp;e : il) &#123;</div><div class="line">        cout &lt;&lt; e &lt;&lt; &quot; &quot;;</div><div class="line">    &#125;</div><div class="line">    cout &lt;&lt; endl;</div><div class="line">&#125;</div><div class="line"></div><div class="line">if (expected != actual) </div><div class="line">    error_msg(&#123;&quot;functionX&quot;, expected, actual&#125;);</div><div class="line">else </div><div class="line">    error_msg(&#123;&quot;functionX&quot;, &quot;okay&quot;&#125;);</div></pre></td></tr></table></figure>
+<h4 id="列表初始化返回值"><a href="#列表初始化返回值" class="headerlink" title="列表初始化返回值"></a>列表初始化返回值</h4><p>C++ 11 规定, 函数可以返回花括号包围的值的列表.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">vector&lt;string&gt; process() &#123;</div><div class="line">    ...</div><div class="line">    if (expected.empty())</div><div class="line">        return &#123;&#125;;</div><div class="line">    else if (expected == actual)</div><div class="line">        return &#123;&quot;functionX&quot;, &quot;okay&quot;&#125;;</div><div class="line">    else </div><div class="line">        return &#123;&quot;functionX&quot;, expected, actual&#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="default"><a href="#default" class="headerlink" title="= default"></a>= default</h4><p>c++ 11中, 如果我们需要默认的构造函数行为, 那么可以通过在参数列表后面写上<code>= default</code> 来要求编译器生成构造函数.其中<code>= default</code>既可以和声明一起出现在类的内部, 也可以作为定义出现在类的外部. 如果出现<code>= default</code>在内部, 那么默认构造函数是内联的, 如果在类外部, 那么该成员默认情况下不内联.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">class SalesData&#123;</div><div class="line">public:</div><div class="line">    SalesData() = default;</div><div class="line">    SalesData(const string &amp;s): bookNo_(s) &#123;&#125;</div><div class="line">    ...</div><div class="line">private:</div><div class="line">    string bookNo_;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="委托构造函数"><a href="#委托构造函数" class="headerlink" title="委托构造函数"></a>委托构造函数</h4><p>委托构造函数使用它所属类的其他构造函数执行它自己的初始化过程, 或者说它把它自己的一些(或者全部)职责委托给了其他构造函数.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">class SalesData &#123;</div><div class="line">public:</div><div class="line">    SalesData(string s, unsigned cnt, double price): bookNo(s), units_sold(cnt), revenue(cnt*price) &#123;&#125;</div><div class="line">    // 其余构造函数全都委托给第一个构造函数</div><div class="line">    SalesData(): SalesData(&quot;&quot;, 0, 0) &#123;&#125;</div><div class="line">    SalesData(string s): SalesData(s, 0, 0) &#123;&#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="容器emplace操作"><a href="#容器emplace操作" class="headerlink" title="容器emplace操作"></a>容器emplace操作</h4><p>新标准引入了三个心成员— emplace_front, emplace和emplace_back, 这些操作构造而不是拷贝元素, 这些操作分别对应push_front, insert和push_back, 允许我们将元素放置在容器头部, 一个指定位置之前或容器尾部.(省去了一次拷贝)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">c.emplace_back(&quot;978-0590353203&quot;, 25, 15.99); // 正确</div><div class="line">c.push_back(&quot;978-0590353203&quot;, 25, 15.99);    // 错误</div><div class="line">c.push_back(SalesData(&quot;978-0590353203&quot;, 25, 15.99)); // 正确, 等价于emplace_back</div></pre></td></tr></table></figure>
+<h4 id="string-和-数值之间的转换"><a href="#string-和-数值之间的转换" class="headerlink" title="string 和 数值之间的转换"></a>string 和 数值之间的转换</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">to_string(val)  将数值val转换成string, val可以是任何算术类型(包括浮点数)</div><div class="line"></div><div class="line">stoi(s, p, b) 返回s的起始子串(表示正数内容)的数值</div><div class="line">stol(s, p, b)</div><div class="line">stoul(s, p, b)</div><div class="line">stoll(s, p, b)</div><div class="line">stoull(s, p, b)</div><div class="line"></div><div class="line">stof(s, p)   返回s的起始子串(表示呢浮点数内容)的数值</div><div class="line">stod(s, p)   // double</div><div class="line">stold(s, p)  // long double</div></pre></td></tr></table></figure>
+<h4 id="lambda-详见-p346页"><a href="#lambda-详见-p346页" class="headerlink" title="lambda (详见 p346页)"></a>lambda (详见<c++ primer=""> p346页)</c++></h4><p>一个lambda表达式表示一个可调用的代码单元, 我们可以将其理解为一个未命名的内联函数.与任何函数类似, 一个lambda具有一个返回类型, 一个参数列表和一个函数体. 但与函数体不同, lambda可能定义在函数内部, 一个lambda表达式具有如下形式:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[capture list](parameter list) -&gt; return type &#123; function body &#125;</div></pre></td></tr></table></figure>
+<p>其中capture list 是一个lambda所在函数中定义的局部变量列表, 通常为空, return type, parameter list 和 function body与任何普通函数一样, 分表表示返回类型, 参数列表和函数体. 但是与普通函数不同, lambda必须使用尾置返回来指定返回类型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">auto f = [] &#123; return 42; &#125;</div><div class="line"></div><div class="line">cout &lt;&lt; f() &lt;&lt; endl;</div></pre></td></tr></table></figure>
+<p>如果忽略返回类型, lambda根据函数体中的代码推断出返回类型.</p>
+<h4 id="bind-函数"><a href="#bind-函数" class="headerlink" title="bind 函数"></a>bind 函数</h4><p>可以将bind函数看做一个通用的函数适配器, 它接受一个可调用的对象, 生成一个新的可调用对象来适应原对象的参数列表.调用bind的一般形式为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">auto newCallable = bind(callable, arg_list)</div></pre></td></tr></table></figure></p>
+<p>其中, newCallable本身是一个可调用对象, arg_list是一个逗号分隔的参数列表, 对应给定的callable的参数. 即, 当我们调用newCallable时, newCallable会调用callable, 并传递给它arg_list中的参数.<br>    arg_list中的参数可能包含形如_n的名字, 其中n是一个正数, 这些参数是占位符, 表示newCallable的参数, 它们占据了传递给newCallable的参数的”位置”. 数值n表示生成的可调用对象中参数的位置: _1为newCallable的第一个参数, _2为第二个参数, 依此类推(详见P354)</p>
+<h4 id="std-move"><a href="#std-move" class="headerlink" title="std::move"></a>std::move</h4><p>详见P469</p>
+<h4 id="右值引用"><a href="#右值引用" class="headerlink" title="右值引用"></a>右值引用</h4><p>为了支持移动操作, 新标准引入了一种新的引用类型—右值引用. 所谓右值引用就是必须绑定到右值的引用. 我们通过&amp;&amp;而不是&amp;来获得右值引用. 右值引用有一个重要的性质—只能绑定到一个将要销毁的对象.因此, 我们可以自由的将一个右值引用的资源”移动” 到另一个对象中.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">int i = 42; </div><div class="line">int &amp;r = i;             // 正确: r引用i</div><div class="line">int &amp;&amp;rr = i;           // 错误: 不能把一个右值引用绑定到一个左值上</div><div class="line">int &amp;r2 = i * 42;       // 错误: i * 42是一个右值</div><div class="line">const int &amp;r3 = i * 42; // 正确: 我们可以将一个const引用绑定到一个右值上</div><div class="line">int &amp;&amp;rr2 = i * 42;     // 正确: 将rr2绑定到乘法结果上</div></pre></td></tr></table></figure></p>
+<p>详见P471</p>
+<h4 id="移动构造函数和移动赋值运算符"><a href="#移动构造函数和移动赋值运算符" class="headerlink" title="移动构造函数和移动赋值运算符"></a>移动构造函数和移动赋值运算符</h4><p>类似拷贝构造函数, 移动构造函数的第一个参数是该类类型的一个引用. 不同于拷贝构造函数的是, 这个引用参数在移动构造函数中是一个右值引用. 与拷贝构造函数一样, 任何额外的参数都必须有默认实参.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">StrVec::StrVec(StrVec &amp;&amp;s) noexcept // 移动操作不应该抛出任何异常</div><div class="line">// 成员初始化器接管s中的资源</div><div class="line">:elements(s.elements), first_free(s.first_free), cap(s.cap) &#123;</div><div class="line">    // 清理s的状态, 令其安全析构</div><div class="line">    s.elements = s.first_free = s.cap = nullptr;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>编译器会合成移动构造函数和移动赋值运算符, 但是如果一个类定义了自己的拷贝构造函数, 拷贝赋值运算符或者析构函数, 编译器就不会为它生成移动构造函数和移动赋值运算符了.(在需要移动构造函数的时候, 会调用拷贝构造函数来代替)</p>
+<h4 id="引用限定符"><a href="#引用限定符" class="headerlink" title="引用限定符"></a>引用限定符</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">#include&lt;iostream&gt;  </div><div class="line">#include&lt;string&gt;  </div><div class="line"></div><div class="line">using namespace std;  </div><div class="line"></div><div class="line">class Animal&#123;  </div><div class="line">    public:  </div><div class="line">        Animal&amp; operator=(const Animal&amp; animal) &amp;;//&amp;引用限定符指定该赋值运算符只能用于左值 ;&amp;&amp;限定符指定赋值运算符只能用于右值   </div><div class="line">    private:  </div><div class="line">        string name;  </div><div class="line">        int weight;   </div><div class="line">&#125;;  </div><div class="line">   </div><div class="line">Animal&amp; Animal::operator=(const Animal&amp; animal) &amp;&#123;  </div><div class="line">    if(this!=&amp;animal)&#123;  </div><div class="line">        name=animal.name;  </div><div class="line">        weight=animal.weight;  </div><div class="line">    &#125;  </div><div class="line">    cout&lt;&lt;&quot;Animal::operator=(const Animal&amp; animal)&amp;&quot;&lt;&lt;endl;  </div><div class="line">    return *this;     </div><div class="line">&#125;  </div><div class="line">int main()&#123;  </div><div class="line">    Animal bird1,bird2,bird3;  </div><div class="line">    move(bird1)=bird3;//error   </div><div class="line">    bird2=bird3;//ok  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="防止继承的发生"><a href="#防止继承的发生" class="headerlink" title="防止继承的发生"></a>防止继承的发生</h4><p>C++11定义了一种防止继承发生的方法, 即在类名后跟一个关键字final:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">class Noderived final&#123;&#125;; // Noderived不能作为基类</div><div class="line">class Base &#123;&#125;;</div><div class="line">class Last final : Base&#123;&#125;; // Last不能作为基类</div></pre></td></tr></table></figure>
+<h4 id="override-说明符"><a href="#override-说明符" class="headerlink" title="override 说明符"></a>override 说明符</h4><p>新标准中, 可以使用override关键字来说明派生类中的虚函数. 如果我们使用override标记了某函数, 但该函数并没有覆盖已存在的虚函数, 此时编译器会报错:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">struct B &#123;</div><div class="line">    virtual void f1(int) const;</div><div class="line">    virtual void f2();</div><div class="line">    void f3();</div><div class="line">&#125;;</div><div class="line"></div><div class="line">struct D1 : B &#123;</div><div class="line">    void f1(int) const override; // 正确</div><div class="line">    void f2(int) override;  // 错误, B中没有形如f2(int)的函数</div><div class="line">    void f3() override;  //错误, f3不是虚函数</div><div class="line">    void f4() override;  // 错误: B没有名为f4的函数</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://winkyao.github.io/2016/04/06/c-11-笔记/" data-id="cj2d2p5160000phnlu32r4eht" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-11/">c++11</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/06/tidb笔记1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          tidb笔记1
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/c-11/" style="font-size: 10px;">c++11</a> <a href="/tags/etcd/" style="font-size: 10px;">etcd</a> <a href="/tags/facebook/" style="font-size: 10px;">facebook</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/haystack/" style="font-size: 10px;">haystack</a> <a href="/tags/paper/" style="font-size: 10px;">paper</a> <a href="/tags/tidb/" style="font-size: 20px;">tidb</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/reboot/">reboot</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/11/haystack/">facebook图片存储之Haystack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/10/etcd-client-DNS-Discovery/">etcd client DNS Discovery</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/07/golang-vendor/">golang vendor</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/06/tidb笔记2/">tidb笔记2</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 wink<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

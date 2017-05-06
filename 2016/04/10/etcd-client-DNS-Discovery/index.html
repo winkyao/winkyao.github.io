@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>etcd client DNS Discovery | 技术之大, 在乎你我心中</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="我们都知道etcd可以作为Discovery Service来使用, 详见, 但是作为etcd自身, 怎么被etcd client发现呢? 下面就介绍一下etcd client的做法. (cluster启动的自我发现在这里就不介绍了, 一般用init-cluster就可以了, 详见)dns discovery 可以作为 client 发现etcd cluster的机制,  -discovery-s">
+<meta name="keywords" content="etcd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="etcd client DNS Discovery">
+<meta property="og:url" content="http://winkyao.github.io/2016/04/10/etcd-client-DNS-Discovery/index.html">
+<meta property="og:site_name" content="技术之大, 在乎你我心中">
+<meta property="og:description" content="我们都知道etcd可以作为Discovery Service来使用, 详见, 但是作为etcd自身, 怎么被etcd client发现呢? 下面就介绍一下etcd client的做法. (cluster启动的自我发现在这里就不介绍了, 一般用init-cluster就可以了, 详见)dns discovery 可以作为 client 发现etcd cluster的机制,  -discovery-s">
+<meta property="og:updated_time" content="2017-05-06T09:34:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="etcd client DNS Discovery">
+<meta name="twitter:description" content="我们都知道etcd可以作为Discovery Service来使用, 详见, 但是作为etcd自身, 怎么被etcd client发现呢? 下面就介绍一下etcd client的做法. (cluster启动的自我发现在这里就不介绍了, 一般用init-cluster就可以了, 详见)dns discovery 可以作为 client 发现etcd cluster的机制,  -discovery-s">
+  
+    <link rel="alternate" href="/atom.xml" title="技术之大, 在乎你我心中" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">技术之大, 在乎你我心中</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-etcd-client-DNS-Discovery" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/10/etcd-client-DNS-Discovery/" class="article-date">
+  <time datetime="2016-04-10T03:39:06.000Z" itemprop="datePublished">2016-04-10</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tech/">tech</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      etcd client DNS Discovery
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>我们都知道etcd可以作为Discovery Service来使用, <a href="https://technologyconversations.com/2015/09/08/service-discovery-zookeeper-vs-etcd-vs-consul/" target="_blank" rel="external">详见</a>, 但是作为etcd自身, 怎么被etcd client发现呢? 下面就介绍一下etcd client的做法.</p>
+<p>(cluster启动的自我发现在这里就不介绍了, 一般用init-cluster就可以了, <a href="https://coreos.com/etcd/docs/latest/clustering.html" target="_blank" rel="external">详见</a>)dns discovery 可以作为 client 发现etcd cluster的机制,  <code>-discovery-srv</code> flag 可以用来指定找到etcd cluster的域名. 下面的 DNS SRV records 按列出顺序被查找(这里只介绍client的discover):</p>
+<ul>
+<li>_etcd-client._tcp.example.com</li>
+<li>_etcd-client-ssl._tcp.example.com</li>
+</ul>
+<a id="more"></a>
+<p>如果 <code>_etcd-client-ssl._tcp.example.com</code> , client会使用ssl来尝试连接etcd</p>
+<h4 id="etcd-client-configuration"><a href="#etcd-client-configuration" class="headerlink" title="etcd client configuration"></a>etcd client configuration</h4><p>DNS SRV records can also be used to help clients discover the etcd cluster.</p>
+<p>The official etcd/client supports DNS Discovery.</p>
+<p>etcdctl also supports DNS Discovery by specifying the <code>--discovery-srv</code>option.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ etcdctl --discovery-srv example.com set foo bar</div></pre></td></tr></table></figure>
+<p>这里注意, 只需要提供<code>example.com</code> 即可, 不需要提供完整的<code>_etcd-client._tcp.example.com</code> 或者 <code>_etcd-client-ssl._tcp.example.com</code>, 因为etcd/client会自动去搜寻这两个.</p>
+<p>用etcd/client 使用DNS Discovery的代码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">d := NewSRVDiscover()</div><div class="line">endpoints, err := d.Discover(&quot;example.com&quot;)</div><div class="line">if err != nil &#123;</div><div class="line">    t.Fatalf(&quot;%d: err: %#v&quot;, i, err)</div><div class="line">&#125;</div><div class="line"></div><div class="line">cfg := client.Config&#123;</div><div class="line">    Endpoints:               endpoints,</div><div class="line">    Transport:               client.DefaultTransport,</div><div class="line">    HeaderTimeoutPerRequest: time.Second,</div><div class="line">&#125;</div><div class="line"></div><div class="line">etcdClient, err := client.New(cfg)</div><div class="line">if err != nil &#123;</div><div class="line">    log.Fatal(&quot;Error: cannot connec to etcd:&quot;, err)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://winkyao.github.io/2016/04/10/etcd-client-DNS-Discovery/" data-id="cj2d2p51d0005phnli4ixnvfq" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/etcd/">etcd</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/11/haystack/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          facebook图片存储之Haystack
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/07/golang-vendor/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">golang vendor</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/c-11/" style="font-size: 10px;">c++11</a> <a href="/tags/etcd/" style="font-size: 10px;">etcd</a> <a href="/tags/facebook/" style="font-size: 10px;">facebook</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/haystack/" style="font-size: 10px;">haystack</a> <a href="/tags/paper/" style="font-size: 10px;">paper</a> <a href="/tags/tidb/" style="font-size: 20px;">tidb</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/reboot/">reboot</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/11/haystack/">facebook图片存储之Haystack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/10/etcd-client-DNS-Discovery/">etcd client DNS Discovery</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/07/golang-vendor/">golang vendor</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/06/tidb笔记2/">tidb笔记2</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 wink<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>facebook图片存储之Haystack | 技术之大, 在乎你我心中</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="论文在: 这里 一个golang开源版本实现: seaweed-FS 毛剑的版本叫bfs 动机facebook原来的方案是把图片存在NFS上, 由于细小的文件太多, NFS的metadata比较大(which is hundreds of bytes large), 导致了无法把metadata都cache到内存中, 而且每次要读取一个图片, 至少需要3次磁盘IO, 第一次读取目录元信息, 第二次">
+<meta name="keywords" content="haystack,facebook,paper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="facebook图片存储之Haystack">
+<meta property="og:url" content="http://winkyao.github.io/2016/04/11/haystack/index.html">
+<meta property="og:site_name" content="技术之大, 在乎你我心中">
+<meta property="og:description" content="论文在: 这里 一个golang开源版本实现: seaweed-FS 毛剑的版本叫bfs 动机facebook原来的方案是把图片存在NFS上, 由于细小的文件太多, NFS的metadata比较大(which is hundreds of bytes large), 导致了无法把metadata都cache到内存中, 而且每次要读取一个图片, 至少需要3次磁盘IO, 第一次读取目录元信息, 第二次">
+<meta property="og:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/7c03fe57-946d-4bec-886a-45f7e9b0f3f0.png">
+<meta property="og:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/cb437e1c-143c-4774-aa44-95d7bb0d39a7.png">
+<meta property="og:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/%09cb437e1c-143c-4774-aa44-95d7bb0d39a10.png">
+<meta property="og:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/%09cb437e1c-143c-4774-aa44-95d7bb0d39a8.png">
+<meta property="og:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/%09cb437e1c-143c-4774-aa44-95d7bb0d39a9.png">
+<meta property="og:updated_time" content="2017-05-06T09:34:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="facebook图片存储之Haystack">
+<meta name="twitter:description" content="论文在: 这里 一个golang开源版本实现: seaweed-FS 毛剑的版本叫bfs 动机facebook原来的方案是把图片存在NFS上, 由于细小的文件太多, NFS的metadata比较大(which is hundreds of bytes large), 导致了无法把metadata都cache到内存中, 而且每次要读取一个图片, 至少需要3次磁盘IO, 第一次读取目录元信息, 第二次">
+<meta name="twitter:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/7c03fe57-946d-4bec-886a-45f7e9b0f3f0.png">
+  
+    <link rel="alternate" href="/atom.xml" title="技术之大, 在乎你我心中" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">技术之大, 在乎你我心中</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-haystack" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/11/haystack/" class="article-date">
+  <time datetime="2016-04-11T14:12:37.000Z" itemprop="datePublished">2016-04-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tech/">tech</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      facebook图片存储之Haystack
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>论文在: <a href="https://www.usenix.org/legacy/event/osdi10/tech/full_papers/Beaver.pdf" target="_blank" rel="external">这里</a></p>
+<p>一个golang开源版本实现: <a href="https://github.com/chrislusf/seaweedfs" target="_blank" rel="external">seaweed-FS</a></p>
+<p>毛剑的版本叫<a href="https://github.com/Terry-Mao/bfs" target="_blank" rel="external">bfs</a></p>
+<h4 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h4><p>facebook原来的方案是把图片存在NFS上, 由于细小的文件太多, NFS的metadata比较大(<code>which is hundreds of bytes large</code>), 导致了无法把metadata都cache到内存中, 而且每次要读取一个图片, 至少需要3次磁盘IO, 第一次读取目录元信息, 第二次读取inode, 第三次读取图片</p>
+<p>而且对于facebook的图片请求, 存在很多long tail请求, 就是很长时间以来都很冷门的图片.(个人相册并不是热门数据), 这就会导致很多请求都不能命中CDN或者自身的cache, 直接落到了磁盘.</p>
+<p>所以它们做了haystack</p>
+<a id="more"></a>
+<h3 id="haystack设计"><a href="#haystack设计" class="headerlink" title="haystack设计"></a>haystack设计</h3><p>haystack 减少了metadata的大小, 让所有的metadata都保存在内存中, 这样所有图片读取就只需要一次的磁盘IO</p>
+<h3 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h3><p>核心组件：Haystack Directory, Haystack cache, Haystack store</p>
+<p><img src="http://7xsoeu.com1.z0.glb.clouddn.com/7c03fe57-946d-4bec-886a-45f7e9b0f3f0.png" alt="Alt text"></p>
+<p>Store是由物理卷组成的，容量由物理卷的数量来控制，100个物理卷可提供10TB的存储空间(100G/volumn)。物理卷还会组合成一个逻辑卷，单个逻辑卷中的所有物理卷数据是相同的，冗余。Directory主要保存应用方面的数据信息，例如每张图片存放在哪个逻辑卷上，还有逻辑卷到物理卷的映射以及逻辑卷的剩余空间。Cache相当于一个内部的CDN。</p>
+<h4 id="获取图片的过程"><a href="#获取图片的过程" class="headerlink" title="获取图片的过程"></a>获取图片的过程</h4><p>Web Server会请求Haystack Directory为该图片生成相应的url, url格式如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://CDN/Cache/Machine-id/&lt;Logical-volume,Photo&gt;</div></pre></td></tr></table></figure>
+<p>CDN部分指定了CDN的地址, CDN可以通过<code>&lt;Logical-volume,Photo&gt;</code>来找到cached在CDN的图片. 如果找不到, 那么它会通过这个URL中的<code>Cache</code>来把请求发到<code>Haystack Cache</code>组件, Cache组件做跟CDN类似的操作, 用<code>&lt;Logical-volume,Photo&gt;</code>查找图片, 如果找不到, 继续缩短url, 变成<code>Machine-id</code>, 去访问Store Machine.</p>
+<p>当然, 请求也可以直接发到<code>Haystack Cache</code>, 这个由Haystack Directory来决定(因为URL是其生成的)</p>
+<h4 id="上传图片"><a href="#上传图片" class="headerlink" title="上传图片"></a>上传图片</h4><p><img src="http://7xsoeu.com1.z0.glb.clouddn.com/cb437e1c-143c-4774-aa44-95d7bb0d39a7.png" alt="Alt text"></p>
+<p>从 Haystack Directory请求一个 write-enabled的logical volumn, 然后web Server指定一个唯一的id给图片, 然后把它上传到逻辑卷相应的物理卷上去(通常是三个副本)</p>
+<h4 id="Haystack-Directory"><a href="#Haystack-Directory" class="headerlink" title="Haystack Directory"></a>Haystack Directory</h4><p>Directory提供四个主要功能:</p>
+<ol>
+<li>提供Logical volume到physical volumes的映射关系 . Web Server在上传图片的时候利用这个映射关系以及在构建image URLs的时候.</li>
+<li>负载均衡</li>
+<li>决定图片请求是发到CDN还是发到Haystack Cache, 用来调整对CDN的依赖</li>
+<li>那些达到容量限制的logical volumes或者为了易操作性, Directory将其标记为Read-only</li>
+</ol>
+<h4 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h4><p>分布式hash表，用图片id作为key定位cache数据。Cache只会在下面两种情况下都吻合的情况下才进行缓存：</p>
+<ol>
+<li>请求来自用户而不是CDN</li>
+<li>从可写的Store机器上读取的数据</li>
+</ol>
+<p>对于1：CDN和cache其实是一样的。<br>对于2：为了保护可写Store机器，有两点，其一，通常新数据都会有较大的访问，其二，我们设计的filesystem在只读或者只写的时候会有更好的性能。</p>
+<h4 id="Haystack-Store"><a href="#Haystack-Store" class="headerlink" title="Haystack Store"></a>Haystack Store</h4><p>每一个Store Machine管理着多个physical volumes. 你可以把physical volume想象成一个非常大的文件(100GB), 类似这种格式<code>/hay/haystack_&lt;logical volume id&gt;</code>. Store Machine可以快速地通过logical volume id和相应的file offset访问到图片. 这个认知对于Haystack来说是是里程碑式的: 通过文件名, offset和文件大小来获取指定的图片而不需要磁盘操作.</p>
+<p>Haystack Store的文件格式如下:</p>
+<p><img src="http://7xsoeu.com1.z0.glb.clouddn.com/%09cb437e1c-143c-4774-aa44-95d7bb0d39a10.png" alt="Alt text"></p>
+<p>每个field的意义如下:<br><img src="http://7xsoeu.com1.z0.glb.clouddn.com/%09cb437e1c-143c-4774-aa44-95d7bb0d39a8.png" alt="Alt text"></p>
+<h5 id="cache到store读："><a href="#cache到store读：" class="headerlink" title="cache到store读："></a>cache到store读：</h5><p>请求数据：logical volume id, key, alternate key, cookie</p>
+<h5 id="cache到store写："><a href="#cache到store写：" class="headerlink" title="cache到store写："></a>cache到store写：</h5><p>上述 + data。数据是append-only的，对于某些修改，比如旋转，允许在原needle上修改，否则其余所有的修改都会以相同的key和alternate key追加一个needle，如果新的needle被追加到别的逻辑卷里，这些信息会被Directory感知，旧卷上的needle永远都不会被访问到了。如果是追加到相同的逻辑卷里, 那么会以file offset来区分, 更大的offset表示这是一个更新的图片</p>
+<h5 id="cache到store删除："><a href="#cache到store删除：" class="headerlink" title="cache到store删除："></a>cache到store删除：</h5><p>设置flags标志。是在compaction的时候回收这些删除的空间, 并且合并一些重复的图片(update导致)</p>
+<h4 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h4><p>为了加快系统启动速度，store机器对每个卷都维护一个index文件。实际上是内存索引某个时刻的checkpoint。</p>
+<p><img src="http://7xsoeu.com1.z0.glb.clouddn.com/%09cb437e1c-143c-4774-aa44-95d7bb0d39a9.png" alt="Alt text"></p>
+<p>会引入问题：index文件可能是旧的。比如当delete照片时，是设置flag而没有升级index，index的升级是异步的，这样可以让写请求快速返回。<br>需要解决两个副作用：needles可能存在但没有对应的index记录，或者index记录没有反映出delete标志。<br>解决办法：</p>
+<p>对于第一个副作用，系统启动时，从卷尾部往头部扫描，补充index。因为没有index的needles肯定是在最后追加的。<br>对于第二个副作用，延迟处理，也就是说没人读的话就不管它，有人读时再判断并更新index。</p>
+<h4 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h4><p>根据Haystack的设计，对文件系统的需求是：不需要太多内存（例如保存文件的filemeta数据），在大文件里快速的随机seek。Haystack 选用的是XFS，好处：</p>
+<ul>
+<li>blockmaps很小</li>
+<li>预分配，减少碎片等等。</li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://winkyao.github.io/2016/04/11/haystack/" data-id="cj2d2p51g000dphnlzyjp9sjj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/facebook/">facebook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/haystack/">haystack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/paper/">paper</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2017/05/06/reboot/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          reboot
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/10/etcd-client-DNS-Discovery/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">etcd client DNS Discovery</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/c-11/" style="font-size: 10px;">c++11</a> <a href="/tags/etcd/" style="font-size: 10px;">etcd</a> <a href="/tags/facebook/" style="font-size: 10px;">facebook</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/haystack/" style="font-size: 10px;">haystack</a> <a href="/tags/paper/" style="font-size: 10px;">paper</a> <a href="/tags/tidb/" style="font-size: 20px;">tidb</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/reboot/">reboot</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/11/haystack/">facebook图片存储之Haystack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/10/etcd-client-DNS-Discovery/">etcd client DNS Discovery</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/07/golang-vendor/">golang vendor</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/06/tidb笔记2/">tidb笔记2</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 wink<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>tidb笔记1 | 技术之大, 在乎你我心中</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="tidb笔记1语法解析tidb的语法解析有一些语句并没有作支持: REPLACE go build -ldflags参数在Makefile中, 有这么一句: 12345678910LDFLAGS += -X &amp;quot;github.com/pingcap/tidb/util/printer.TiDBBuildTS=$(shell date -u &amp;apos;+%Y-%m-%d %I:%M:%S&amp;">
+<meta name="keywords" content="tidb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tidb笔记1">
+<meta property="og:url" content="http://winkyao.github.io/2016/04/06/tidb笔记1/index.html">
+<meta property="og:site_name" content="技术之大, 在乎你我心中">
+<meta property="og:description" content="tidb笔记1语法解析tidb的语法解析有一些语句并没有作支持: REPLACE go build -ldflags参数在Makefile中, 有这么一句: 12345678910LDFLAGS += -X &amp;quot;github.com/pingcap/tidb/util/printer.TiDBBuildTS=$(shell date -u &amp;apos;+%Y-%m-%d %I:%M:%S&amp;">
+<meta property="og:updated_time" content="2017-05-06T09:34:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tidb笔记1">
+<meta name="twitter:description" content="tidb笔记1语法解析tidb的语法解析有一些语句并没有作支持: REPLACE go build -ldflags参数在Makefile中, 有这么一句: 12345678910LDFLAGS += -X &amp;quot;github.com/pingcap/tidb/util/printer.TiDBBuildTS=$(shell date -u &amp;apos;+%Y-%m-%d %I:%M:%S&amp;">
+  
+    <link rel="alternate" href="/atom.xml" title="技术之大, 在乎你我心中" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">技术之大, 在乎你我心中</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-tidb笔记1" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/06/tidb笔记1/" class="article-date">
+  <time datetime="2016-04-06T08:04:42.000Z" itemprop="datePublished">2016-04-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tech/">tech</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      tidb笔记1
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="tidb笔记1"><a href="#tidb笔记1" class="headerlink" title="tidb笔记1"></a>tidb笔记1</h1><h3 id="语法解析"><a href="#语法解析" class="headerlink" title="语法解析"></a>语法解析</h3><p>tidb的语法解析有一些语句并没有作支持: REPLACE</p>
+<h3 id="go-build-ldflags参数"><a href="#go-build-ldflags参数" class="headerlink" title="go build -ldflags参数"></a>go build -ldflags参数</h3><p>在Makefile中, 有这么一句:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">LDFLAGS += -X &quot;github.com/pingcap/tidb/util/printer.TiDBBuildTS=$(shell date -u &apos;+%Y-%m-%d %I:%M:%S&apos;)&quot;</div><div class="line">LDFLAGS += -X &quot;github.com/pingcap/tidb/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)&quot;</div><div class="line">...</div><div class="line"></div><div class="line">server:</div><div class="line">ifeq ($(TARGET), &quot;&quot;)</div><div class="line">    @cd tidb-server &amp;&amp; $(GO) build -ldflags &apos;$(LDFLAGS)&apos;</div><div class="line">else</div><div class="line">    @cd tidb-server &amp;&amp; $(GO) build -ldflags &apos;$(LDFLAGS)&apos; -o &apos;$(TARGET)&apos;</div><div class="line">endif</div></pre></td></tr></table></figure>
+<a id="more"></a>
+<p>我们来看看ldflags的意义</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ go help build</div><div class="line">...</div><div class="line">    -ldflags &apos;flag list&apos;</div><div class="line">          arguments to pass on each go tool link invocation.</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>这个参数是传递给go tool link的, 我们看看go tool:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">  -V    print version and exit</div><div class="line">  -W    disassemble input</div><div class="line">  -X definition</div><div class="line">        add string value definition of the form importpath.name=value</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>这个-X选项的意思是,  在二进制中增加一个定义, 格式是importpath.variable_name=value, 所以我们看到了printer.TiDBBuildTS和printer.TiDBGitHash的两个变量的定义. 在看看这两个变量在代码中的位置:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">package printer</div><div class="line"></div><div class="line">import (</div><div class="line">    &quot;bytes&quot;</div><div class="line">    &quot;fmt&quot;</div><div class="line">)</div><div class="line"></div><div class="line">// Version information.</div><div class="line">var (</div><div class="line">    TiDBBuildTS = &quot;None&quot;</div><div class="line">    TiDBGitHash = &quot;None&quot;</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>这就知道了这个选项的目的了</p>
+<h3 id="从Slice转换到String-避免复制"><a href="#从Slice转换到String-避免复制" class="headerlink" title="从Slice转换到String 避免复制"></a>从Slice转换到String 避免复制</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">// String converts slice to string without copy.</div><div class="line">// Use at your own risk.</div><div class="line">func String(b []byte) (s string) &#123;</div><div class="line">    if len(b) == 0 &#123;</div><div class="line">        return &quot;&quot;</div><div class="line">    &#125;</div><div class="line">    pbytes := (*reflect.SliceHeader)(unsafe.Pointer(&amp;b))</div><div class="line">    pstring := (*reflect.StringHeader)(unsafe.Pointer(&amp;s))</div><div class="line">    pstring.Data = pbytes.Data</div><div class="line">    pstring.Len = pbytes.Len</div><div class="line">    return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>slice转string之后，如果slice的值有变化，string也会跟着改变，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">b := []byte(&quot;hello world&quot;)</div><div class="line"></div><div class="line">a := String(b)</div><div class="line"></div><div class="line">b[0] = &apos;a&apos;</div><div class="line"></div><div class="line">println(a)  //output  aello world</div></pre></td></tr></table></figure>
+<p>但是string转slice之后，就不能更改slice了，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">a := &quot;hello world&quot;</div><div class="line"></div><div class="line">b := Slice(a)</div><div class="line"></div><div class="line">b[0] = &apos;a&apos;  //这里就等着崩溃吧</div><div class="line"></div><div class="line">//但是可以这样，因为go又重新给b分配了内存</div><div class="line">b = append(b, &quot;hello world&quot;…)</div></pre></td></tr></table></figure></p>
+<p>上面为什么会崩溃我猜想可能是string是immutable的，可能对应的内存地址也是不允许改动的。</p>
+<p>另外，上面这个崩溃在defer里面是recover不回来的，真的就崩溃了，原因可能就跟c的非法内存访问一样，os不跟你玩了。</p>
+<h3 id="并发控制"><a href="#并发控制" class="headerlink" title="并发控制"></a>并发控制</h3><p>tiDB里面利用channel实现了一种沙漏算法, 详情见: server/tokenlimiter.go 以及Server.getToken, releaseToken函数</p>
+<h3 id="bootstrap-tidb-bootstrap-go-89"><a href="#bootstrap-tidb-bootstrap-go-89" class="headerlink" title="bootstrap(tidb/bootstrap.go:89)"></a>bootstrap(tidb/bootstrap.go:89)</h3><p>每次tidb启动, 都会执行这个启动函数一次.</p>
+<h4 id="compile"><a href="#compile" class="headerlink" title="compile"></a>compile</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">// Compile is safe for concurrent use by multiple goroutines.</div><div class="line">func Compile(src string) ([]stmt.Statement, error) &#123;</div><div class="line">    log.Debug(&quot;compiling&quot;, src)</div><div class="line">    l := parser.NewLexer(src)</div><div class="line">    if parser.YYParse(l) != 0 &#123;</div><div class="line">        log.Warnf(&quot;compiling %s, error: %v&quot;, src, l.Errors()[0])</div><div class="line">        return nil, errors.Trace(l.Errors()[0])</div><div class="line">    &#125;</div><div class="line">    rawStmt := l.Stmts()</div><div class="line">    stmts := make([]stmt.Statement, len(rawStmt))</div><div class="line">    for i, v := range rawStmt &#123;</div><div class="line">        if node, ok := v.(ast.Node); ok &#123;</div><div class="line">            stm, err := optimizer.Compile(node)</div><div class="line">            if err != nil &#123;</div><div class="line">                return nil, errors.Trace(err)</div><div class="line">            &#125;</div><div class="line">            stmts[i] = stm</div><div class="line">        &#125; else &#123;</div><div class="line">            stmts[i] = v.(stmt.Statement)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return stmts, nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们看到这里有一个判断是不是抽象语法树ast.Node的, tidb里面心很大它实现了两套statement对象, 一套是ast包里面的, 可以用调用<code>stm, err := optimizer.Compile(node)</code>来优化, 一套是stmt包里面的, 详见parser.y:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">StatementList:</div><div class="line">    Statement</div><div class="line">    &#123;</div><div class="line">        if $1 != nil &#123;</div><div class="line">            n, ok := $1.(ast.Node)</div><div class="line">            if ok &#123;</div><div class="line">                n.SetText(yylex.(*lexer).stmtText())</div><div class="line">                yylex.(*lexer).list = []interface&#123;&#125;&#123;n&#125;  // 作为ast.Node</div><div class="line">            &#125; else &#123;</div><div class="line">                s := $1.(stmt.Statement)   // 否则作为stmt.Statement</div><div class="line">                s.SetText(yylex.(*lexer).stmtText())</div><div class="line">                yylex.(*lexer).list = []interface&#123;&#125;&#123;s&#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>然而, 并没什么卵用, 在parser.y中可以看到, 所有的Statement都是stmt包里面的, 所以Compile中的<code>optimizer.Compile(node)</code> 不会运行.</p>
+<h3 id="并行Create-database会失败"><a href="#并行Create-database会失败" class="headerlink" title="并行Create database会失败"></a>并行Create database会失败</h3><p>看到:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">func (d *ddl) verifySchemaMetaVersion(txn kv.Transaction, schemaMetaVersion int64) error &#123;</div><div class="line">    curVer, err := txn.GetInt64(meta.SchemaMetaVersionKey)</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    if curVer != schemaMetaVersion &#123;</div><div class="line">        return errors.Errorf(&quot;Schema changed, our version %d, but got %d&quot;, schemaMetaVersion, curVer)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Increment version.</div><div class="line">    _, err = txn.Inc(meta.SchemaMetaVersionKey, 1)</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if err := txn.LockKeys(meta.SchemaMetaVersionKey); err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    return errors.Trace(err)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>如果在别的goroutine中别人更改了meta.SchemaMetaVersionKey, 那么此次create database就会失败, 也不会重试</p>
+<h2 id="事务实现"><a href="#事务实现" class="headerlink" title="事务实现"></a>事务实现</h2><p>参考: <a href="http://dev.mysql.com/doc/refman/5.7/en/innodb-transaction-model.html" target="_blank" rel="external">mysql事务</a></p>
+<p>基本借鉴了percolater那种利用时间戳来实现多版本的方式, 在事务中修改的值通过<code>dbTxn.LockKeys</code>函数来把key锁住, 如果在别的事务中对这些key修改了, 那么此事务commit的时候将不能成功, 具体的实现在dbTxn.doCommit:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">func (txn *dbTxn) doCommit() error &#123;</div><div class="line">    ...</div><div class="line">    // Check locked keys</div><div class="line">    for k, v := range txn.snapshotVals &#123;</div><div class="line">        err := txn.store.tryConditionLockKey(txn.tid, k, v)</div><div class="line">        if err != nil &#123;</div><div class="line">            return errors.Trace(err)</div><div class="line">        &#125;</div><div class="line">        keysLocked = append(keysLocked, k)</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在向leveldb写入值之前, 先用tryConditionLockKey看能否锁住那些值, 同时判断现在存在的版本是否已经被别人修改过(通过值绑定的版本, 也就是时间戳来判断):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">// Both lock and unlock are used for simulating scenario of percolator papers.</div><div class="line">func (s *dbStore) tryConditionLockKey(tid uint64, key string, snapshotVal []byte) error &#123;</div><div class="line">    s.mu.Lock()</div><div class="line">    defer s.mu.Unlock()</div><div class="line"></div><div class="line">    if _, ok := s.keysLocked[key]; ok &#123;</div><div class="line">        return errors.Trace(kv.ErrLockConflict)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    metaKey := codec.EncodeBytes(nil, []byte(key))</div><div class="line">    currValue, err := s.db.Get(metaKey)</div><div class="line">    if errors2.ErrorEqual(err, kv.ErrNotExist) || currValue == nil &#123;</div><div class="line">        // If it&apos;s a new key, we won&apos;t need to check its version</div><div class="line">        return nil</div><div class="line">    &#125;</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    _, ver, err := codec.DecodeUint(currValue)</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // If there&apos;s newer version of this key, returns error.</div><div class="line">    if ver &gt; tid &#123;</div><div class="line">        log.Warnf(&quot;txn:%d, tryLockKey condition not match for key %s, currValue:%q, snapshotVal:%q&quot;, tid, key, currValue, snapshotVal)</div><div class="line">        return errors.Trace(kv.ErrConditionNotMatch)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    s.keysLocked[key] = tid</div><div class="line"></div><div class="line">    return nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然而, 即使如此, 还是会有write skew问题, 因为其并没有对读取的值锁住. 所以, tidb也对Select for update做出了相应的支持</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">func (txn *dbTxn) doCommit() error &#123;</div><div class="line">    b := txn.store.newBatch()</div><div class="line">    keysLocked := make([]string, 0, len(txn.snapshotVals))</div><div class="line">    defer func() &#123;</div><div class="line">        for _, key := range keysLocked &#123;</div><div class="line">            txn.store.unLockKeys(key)</div><div class="line">        &#125;</div><div class="line">    &#125;()</div><div class="line">    // Check locked keys</div><div class="line">    for k, v := range txn.snapshotVals &#123;</div><div class="line">        err := txn.store.tryConditionLockKey(txn.tid, k, v)</div><div class="line">        if err != nil &#123;</div><div class="line">            return errors.Trace(err)</div><div class="line">        &#125;</div><div class="line">        keysLocked = append(keysLocked, k)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Check dirty store</div><div class="line">    curVer, err := globalVersionProvider.CurrentVersion()</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    err = txn.each(func(iter iterator.Iterator) error &#123;</div><div class="line">        metaKey := codec.EncodeBytes(nil, iter.Key())</div><div class="line">        // put dummy meta key, write current version</div><div class="line">        b.Put(metaKey, codec.EncodeUint(nil, curVer.Ver)) // 每个key都有一个对应的metakey, 保存的是这个key的version(时间戳)</div><div class="line">        mvccKey := MvccEncodeVersionKey(iter.Key(), curVer) // 然后通过这个version跟key结合起来就可以得到真正的key</div><div class="line">        if len(iter.Value()) == 0 &#123; // Deleted marker</div><div class="line">            b.Put(mvccKey, nil)</div><div class="line">        &#125; else &#123;</div><div class="line">            b.Put(mvccKey, iter.Value())</div><div class="line">        &#125;</div><div class="line">        return nil</div><div class="line">    &#125;)</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    // Update commit version.</div><div class="line">    txn.version = curVer</div><div class="line">    // Release read lock before write. Workaround for BoltDB.</div><div class="line">    txn.Snapshot.Release()</div><div class="line">    return txn.store.writeBatch(b)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="infoSchema-tables-构造"><a href="#infoSchema-tables-构造" class="headerlink" title="infoSchema.tables 构造"></a>infoSchema.tables 构造</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">type infoSchema struct &#123;</div><div class="line">    schemaNameToID map[string]int64</div><div class="line">    tableNameToID  map[tableName]int64</div><div class="line">    columnNameToID map[columnName]int64</div><div class="line">    schemas        map[int64]*model.DBInfo</div><div class="line">    tables         map[int64]table.Table</div><div class="line">    columns        map[int64]*model.ColumnInfo</div><div class="line">    indices        map[indexName]*model.IndexInfo</div><div class="line">    columnIndices  map[int64][]*model.IndexInfo</div><div class="line"></div><div class="line">    // We should check version when change schema.</div><div class="line">    schemaMetaVersion int64</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>infoSchema.tables成员是用来存放table定义的, 但是让我感觉迷惑的是, 在ddl.CreateTable中, 并没有对这个值进行构造:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">func (d *ddl) CreateTable(ctx context.Context, ident table.Ident, colDefs []*coldef.ColumnDef, constraints []*coldef.TableConstraint) (err error) &#123;</div><div class="line">    ...</div><div class="line">    tbInfo, err := d.buildTableInfo(ident.Name, cols, newConstraints)</div><div class="line">    ...</div><div class="line">    err = kv.RunInNewTxn(d.store, false, func(txn kv.Transaction) error &#123;</div><div class="line">        err := d.verifySchemaMetaVersion(txn, is.SchemaMetaVersion())</div><div class="line">        if err != nil &#123;</div><div class="line">            return errors.Trace(err)</div><div class="line">        &#125;</div><div class="line">        err = d.updateInfoSchema(ident.Schema, tbInfo, txn)</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>只设置了model.TableInfo, 那么, 到底infoSchema.tables是在哪里更新的呢, 我们看到CreateTable还会触发Domain.onDDLChange, 这个函数里面:</p>
+<p>调用了Handle.Set<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">func (h *Handle) Set(newInfo []*model.DBInfo, schemaMetaVersion int64) &#123;</div><div class="line">    ...</div><div class="line">    for _, di := range newInfo &#123;</div><div class="line">        info.schemas[di.ID] = di</div><div class="line">        info.schemaNameToID[di.Name.L] = di.ID</div><div class="line">        for _, t := range di.Tables &#123;</div><div class="line">            alloc := autoid.NewAllocator(h.store)</div><div class="line">            info.tables[t.ID] = table.TableFromMeta(di.Name.L, alloc, t) // 就是在这里设置的tables</div><div class="line">            ...</div><div class="line">    &#125;</div><div class="line">    h.value.Store(info)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>所以每次新建一个Table, tidb都会重建infoSchema.tables变量(这样不好吧? 为何不增量的增加)</p>
+<h3 id="codec-EncodeBytes"><a href="#codec-EncodeBytes" class="headerlink" title="codec.EncodeBytes"></a>codec.EncodeBytes</h3><p>我们看到每次插入leveldb之前, 都会对其key作Encode</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">// EncodeBytes encodes the slice value using an escape based encoding,</div><div class="line">// with the following rule:</div><div class="line">//  \x00 -&gt; \x00\xFF</div><div class="line">//  \xFF -&gt; \xFF\x00 if the first byte is \xFF</div><div class="line">// EncodeBytes will append \x00\x01 at the end of the encoded value to</div><div class="line">// indicate the termination.</div><div class="line">// EncodeBytes guarantees the encoded value is in ascending order for comparison,</div><div class="line">// The encoded value is &gt;= SmallestNoneNilValue and &lt; InfiniteValue.</div><div class="line">func EncodeBytes(b []byte, data []byte) []byte &#123;</div><div class="line">    if len(data) &gt; 0 &amp;&amp; data[0] == 0xFF &#123;</div><div class="line">        // we must escape 0xFF here to guarantee encoded value &lt; InfiniteValue \xFF\xFF.</div><div class="line">        b = append(b, 0xFF, 0x00)</div><div class="line">        data = data[1:]</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    for &#123;</div><div class="line">        // find 0x00 and escape it.</div><div class="line">        i := bytes.IndexByte(data, 0x00)</div><div class="line">        if i == -1 &#123;</div><div class="line">            break</div><div class="line">        &#125;</div><div class="line">        b = append(b, data[:i]...)</div><div class="line">        b = append(b, 0x00, 0xFF)</div><div class="line">        data = data[i+1:]</div><div class="line">    &#125;</div><div class="line">    b = append(b, data...)</div><div class="line">    return append(b, 0x00, 0x01)</div><div class="line">&#125;</div><div class="line"></div><div class="line">func (txn *dbTxn) Seek(k kv.Key, fnKeyCmp func(kv.Key) bool) (kv.Iterator, error) &#123;</div><div class="line">    ...</div><div class="line">    k = kv.EncodeKey(k)</div><div class="line"></div><div class="line">    iter, err := txn.UnionStore.Seek(k, txn)</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其用意可从下面这段注释中窥得一二:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">func genIndexPrefix(indexPrefix, indexName string) string &#123;</div><div class="line">    // Use EncodeBytes to guarantee generating different index prefix.</div><div class="line">    // e.g, two indices c1 and c with index prefix p, if no EncodeBytes,</div><div class="line">    // the index format looks p_c and p_c1, if c has an index value which the first encoded byte is &apos;1&apos;,</div><div class="line">    // we will meet an error, because p_c1 is for index c1.</div><div class="line">    // If EncodeBytes, c1 -&gt; c1\x00\x01 and c -&gt; c\x00\x01, the prefixs are different.</div><div class="line">    key := fmt.Sprintf(&quot;%s_%s&quot;, indexPrefix, indexName)</div><div class="line">    return string(codec.EncodeBytes(nil, []byte(key)))</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="INSERT-…-ON-DUPLICATE-KEY-UPDATE-Syntax"><a href="#INSERT-…-ON-DUPLICATE-KEY-UPDATE-Syntax" class="headerlink" title="INSERT … ON DUPLICATE KEY UPDATE Syntax"></a>INSERT … ON DUPLICATE KEY UPDATE Syntax</h3><p>具体详情见:<a href="https://dev.mysql.com/doc/refman/5.7/en/insert-on-duplicate.html" target="_blank" rel="external">mysql:  ON DUPLICATE KEY UPDATE Syntax</a></p>
+<p>这里举个例子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">select * from player_count where player_id = 1;//查询统计表中是否有记录</div><div class="line">insert into player_count(player_id,count) value(1,1);//没有记录就执行insert 操作</div><div class="line">update player_count set count = count+1 where player_id = 1;//有记录就执行update操作</div></pre></td></tr></table></figure>
+<p>这种写法比较麻烦, 用on duplicate key update 的做法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">insert into player_count(player_id,count) value(1,1) on duplicate key update count=count+1;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://winkyao.github.io/2016/04/06/tidb笔记1/" data-id="cj2d2p51p000nphnly1e8izhj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/06/tidb笔记2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          tidb笔记2
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/06/c-11-笔记/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">c++11 笔记</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/c-11/" style="font-size: 10px;">c++11</a> <a href="/tags/etcd/" style="font-size: 10px;">etcd</a> <a href="/tags/facebook/" style="font-size: 10px;">facebook</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/haystack/" style="font-size: 10px;">haystack</a> <a href="/tags/paper/" style="font-size: 10px;">paper</a> <a href="/tags/tidb/" style="font-size: 20px;">tidb</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/reboot/">reboot</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/11/haystack/">facebook图片存储之Haystack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/10/etcd-client-DNS-Discovery/">etcd client DNS Discovery</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/07/golang-vendor/">golang vendor</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/06/tidb笔记2/">tidb笔记2</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 wink<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

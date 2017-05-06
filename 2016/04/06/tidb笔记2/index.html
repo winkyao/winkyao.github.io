@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>tidb笔记2 | 技术之大, 在乎你我心中</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="tidb index实现tidb的index不像mysql那样, 由于tidb对于value的获取全是kv操作, 不需要有实质的查询优化, 其只需要用来保证相应的unique等特性跟mysql表现一致即可, 所以tidb的index更多的像是一种兼容的方案.">
+<meta name="keywords" content="tidb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tidb笔记2">
+<meta property="og:url" content="http://winkyao.github.io/2016/04/06/tidb笔记2/index.html">
+<meta property="og:site_name" content="技术之大, 在乎你我心中">
+<meta property="og:description" content="tidb index实现tidb的index不像mysql那样, 由于tidb对于value的获取全是kv操作, 不需要有实质的查询优化, 其只需要用来保证相应的unique等特性跟mysql表现一致即可, 所以tidb的index更多的像是一种兼容的方案.">
+<meta property="og:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/1445931527845.png">
+<meta property="og:updated_time" content="2017-05-06T09:34:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="tidb笔记2">
+<meta name="twitter:description" content="tidb index实现tidb的index不像mysql那样, 由于tidb对于value的获取全是kv操作, 不需要有实质的查询优化, 其只需要用来保证相应的unique等特性跟mysql表现一致即可, 所以tidb的index更多的像是一种兼容的方案.">
+<meta name="twitter:image" content="http://7xsoeu.com1.z0.glb.clouddn.com/1445931527845.png">
+  
+    <link rel="alternate" href="/atom.xml" title="技术之大, 在乎你我心中" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">技术之大, 在乎你我心中</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-tidb笔记2" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/06/tidb笔记2/" class="article-date">
+  <time datetime="2016-04-06T08:04:52.000Z" itemprop="datePublished">2016-04-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tech/">tech</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      tidb笔记2
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="tidb-index实现"><a href="#tidb-index实现" class="headerlink" title="tidb index实现"></a>tidb index实现</h1><p>tidb的index不像mysql那样, 由于tidb对于value的获取全是kv操作, 不需要有实质的查询优化, 其只需要用来保证相应的unique等特性跟mysql表现一致即可, 所以tidb的index更多的像是一种兼容的方案. </p>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">func (t *Table) AddRecord(ctx context.Context, r []interface&#123;&#125;) (recordID int64, err error) &#123;</div><div class="line">    ...</div><div class="line">    for _, v := range t.indices &#123;  // 遍历table每一个index的组合</div><div class="line">        if v == nil &#123;</div><div class="line">            continue</div><div class="line">        &#125;</div><div class="line">        colVals, _ := v.FetchValues(r)</div><div class="line">        if err = v.X.Create(txn, colVals, recordID); err != nil &#123;</div><div class="line">            if errors2.ErrorEqual(err, kv.ErrKeyExists) &#123;</div><div class="line">                // Get the duplicate row handle</div><div class="line">                // For insert on duplicate syntax, we should update the row</div><div class="line">                iter, _, terr := v.X.Seek(txn, colVals)</div><div class="line">                if terr != nil &#123;</div><div class="line">                    return 0, errors.Trace(terr)</div><div class="line">                &#125;</div><div class="line">                _, h, terr := iter.Next()</div><div class="line">                if terr != nil &#123;</div><div class="line">                    return 0, errors.Trace(terr)</div><div class="line">                &#125;</div><div class="line">                return h, errors.Trace(err)</div><div class="line">            &#125;</div><div class="line">            return 0, errors.Trace(err)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这是Insert语句中涉及到Index的部分, 首先, 它会从插入的值中获得对应的index列, 在v.FetchValues中获得:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">func (idx *IndexedCol) FetchValues(r []interface&#123;&#125;) ([]interface&#123;&#125;, error) &#123;</div><div class="line">    var vals []interface&#123;&#125;</div><div class="line">    for _, ic := range idx.Columns &#123;</div><div class="line">        if ic.Offset &lt; 0 || ic.Offset &gt; len(r) &#123;</div><div class="line">            return nil, errors.New(&quot;Index column offset out of bound&quot;)</div><div class="line">        &#125;</div><div class="line">        vals = append(vals, r[ic.Offset])</div><div class="line">    &#125;</div><div class="line">    return vals, nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后调用<code>v.X.Create</code>尝试创建这个index:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">func (c *kvIndex) Create(txn Transaction, indexedValues []interface&#123;&#125;, h int64) error &#123;</div><div class="line">    keyBuf, err := c.genIndexKey(indexedValues, h)</div><div class="line">    if err != nil &#123;</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    if !c.unique &#123;</div><div class="line">        // TODO: reconsider value</div><div class="line">        err = txn.Set(keyBuf, []byte(&quot;timestamp?&quot;))</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // unique index</div><div class="line">    _, err = txn.Get(keyBuf)</div><div class="line">    if IsErrNotFound(err) &#123;</div><div class="line">        err = txn.Set(keyBuf, encodeHandle(h)) // 将本条记录的id, recordid当成value写入</div><div class="line">        return errors.Trace(err)</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return errors.Trace(ErrKeyExists)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们先来看看unique index的key value, 它会把当前的recordid(这条记录唯一的id)当成value存起来, 这个在处理duplicate update的时候有用:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">if err = v.X.Create(txn, colVals, recordID); err != nil &#123;</div><div class="line">        if errors2.ErrorEqual(err, kv.ErrKeyExists) &#123;</div><div class="line">                iter, _, terr := v.X.Seek(txn, colVals)</div><div class="line">                if terr != nil &#123;</div><div class="line">                    return 0, errors.Trace(terr)</div><div class="line">                &#125;</div><div class="line">                _, h, terr := iter.Next()</div><div class="line">                ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>当index重复了, 而且其为unique的, 不允许重复的话, 那么Create会返回<code>kv.ErrKeyExists</code> error, 那么从这个Index的value中找到其相应的recordid, 用于在Duplicate update的时候获取该条记录, 来进行Update某些列</p>
+<p>如果非Unique index, 其值当前还未用上, 就随便用了一个<code>&quot;timestamp?&quot;</code>, 来存.</p>
+<h4 id="kvIndex-genIndexKey"><a href="#kvIndex-genIndexKey" class="headerlink" title="kvIndex.genIndexKey"></a>kvIndex.genIndexKey</h4><p>我们再来看看c.genIndexKey到底是怎么来产生index相应的key的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">func (c *kvIndex) genIndexKey(indexedValues []interface&#123;&#125;, h int64) ([]byte, error) &#123;</div><div class="line">    var (</div><div class="line">        encVal []byte</div><div class="line">        err    error</div><div class="line">    )</div><div class="line">    // only support single value index</div><div class="line">    if !c.unique &#123;</div><div class="line">        encVal, err = EncodeValue(append(indexedValues, h)...)</div><div class="line">    &#125; else &#123;</div><div class="line">        /*</div><div class="line">            See: https://dev.mysql.com/doc/refman/5.7/en/create-index.html</div><div class="line">            A UNIQUE index creates a constraint such that all values in the index must be distinct.</div><div class="line">            An error occurs if you try to add a new row with a key value that matches an existing row.</div><div class="line">            For all engines, a UNIQUE index permits multiple NULL values for columns that can contain NULL.</div><div class="line">        */</div><div class="line">        containsNull := false</div><div class="line">        for _, cv := range indexedValues &#123;</div><div class="line">            if cv == nil &#123;</div><div class="line">                containsNull = true</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if containsNull &#123;</div><div class="line">            encVal, err = EncodeValue(append(indexedValues, h)...)</div><div class="line">        &#125; else &#123;</div><div class="line">            encVal, err = EncodeValue(indexedValues...)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if err != nil &#123;</div><div class="line">        return nil, errors.Trace(err)</div><div class="line">    &#125;</div><div class="line">    buf := append([]byte(nil), []byte(c.prefix)...)</div><div class="line">    buf = append(buf, encVal...)</div><div class="line">    return buf, nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>参数h是recordId, indexedValues是插入值中对应Index列的几个值. 可以看到index key的结构如下:<br>| indexPrefix  |   encValue | </p>
+<p>encValue:</p>
+<p>可以看到, 如果是非Unique的, 那么这个index不会对插入的值造成任何约束, 也就是这条Insert一定会成功, 那么, 怎么样就不会在leveldb中找到相应的值呢, 只要把recordid绑定起来, 那么这个index key就是全局唯一的了:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">if !c.unique &#123;</div><div class="line">        encVal, err = EncodeValue(append(indexedValues, h)...)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果是Unique的, 那么, 如果相同的值, 是需要报告Duplicate错误的, 那么, 就不能绑定recordid了:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">containsNull := false</div><div class="line">        for _, cv := range indexedValues &#123;</div><div class="line">            if cv == nil &#123;</div><div class="line">                containsNull = true</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if containsNull &#123;</div><div class="line">            encVal, err = EncodeValue(append(indexedValues, h)...) // 可是为什么这里还是绑定了recordID呢?</div><div class="line">        &#125; else &#123;</div><div class="line">            encVal, err = EncodeValue(indexedValues...)</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<p>为什么在插入index列中出现了nil, 就可以不用管Unique约束呢, 我们看到其注释如下:</p>
+<blockquote>
+<p>/<em><br>            See: <a href="https://dev.mysql.com/doc/refman/5.7/en/create-index.html" target="_blank" rel="external">https://dev.mysql.com/doc/refman/5.7/en/create-index.html</a><br>            A UNIQUE index creates a constraint such that all values in the index must be distinct.<br>            An error occurs if you try to add a new row with a key value that matches an existing row.<br>            For all engines, a UNIQUE index permits multiple NULL values for columns that can contain NULL.
+        </em>/</p>
+</blockquote>
+<p>答案就是: a UNIQUE index permits multiple NULL values for columns that can contain NULL. 在之前tidb在:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">if err = column.CheckNotNull(tableCols, r); err != nil &#123;</div><div class="line">            return nil, errors.Trace(err)</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<p>中判断了这些列是否允许NULL了, 所以这里出现NULL是肯定合法的.</p>
+<h4 id="index列为nil的情形"><a href="#index列为nil的情形" class="headerlink" title="index列为nil的情形"></a>index列为nil的情形</h4><p>问题: mysql是否所有index都为NOT NULL? 否, 只有primary有这个要求</p>
+<p>是否所有的index都会有default value, 或者说所有的列都会有default value?</p>
+<p><code>func (t *Table) AddRecord(ctx context.Context, r []interface{}) (recordID int64, err error)</code></p>
+<p>也就是参数r数组里面的全部元素都不为nil? </p>
+<p>答案: 除非是自己用<code>insert into test(id, xxx) values(1, NULL)</code>, 该元素为nil以外, 其他未指定的(除了auto-increment列), 都会通过<code>InsertIntoStmt.initDefaultValues</code>获得默认值.</p>
+<h3 id="这不是一个BUG"><a href="#这不是一个BUG" class="headerlink" title="这不是一个BUG"></a>这不是一个BUG</h3><p>下面的语句错误? 这是因为 test1是 int类型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">mysql&gt; desc nosharding_test;</div><div class="line">+-------+------------------+------+------+---------+----------------+</div><div class="line">| Field | Type             | Null | Key  | Default | Extra          |</div><div class="line">+-------+------------------+------+------+---------+----------------+</div><div class="line">| id    | int(11) UNSIGNED | NO   | PRI  | NULL    | auto_increment |</div><div class="line">| test1 | int(5)           | YES  |      | NULL    |                |</div><div class="line">+-------+------------------+------+------+---------+----------------+</div><div class="line"></div><div class="line">mysql&gt; insert into nosharding_test(id, test1) values(3, &quot;NULL&quot;);</div><div class="line">ERROR 1105 (HY000): strconv.ParseFloat: parsing &quot;NULL&quot;: invalid syntax</div><div class="line"></div><div class="line">mysql&gt; insert into nosharding_test(id, test1) values(2, NULL);</div><div class="line">Query OK, 1 row affected (0.01 sec)</div></pre></td></tr></table></figure>
+<p>在MYSQL中执行会这样:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mysql&gt; insert into nosharding_test(id, test1) values(3, &quot;NULL&quot;);</div><div class="line">ERROR 1366 (HY000): Incorrect integer value: &apos;NULL&apos; for column &apos;test1&apos; at row 1</div></pre></td></tr></table></figure></p>
+<h3 id="insert-Table数据存放方式"><a href="#insert-Table数据存放方式" class="headerlink" title="insert Table数据存放方式"></a>insert Table数据存放方式</h3><p>在<code>Table.AddRecord</code>是增加一行记录的接口:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">func (t *Table) AddRecord(ctx context.Context, r []interface&#123;&#125;) (recordID int64, err error) &#123;</div><div class="line">    ...</div><div class="line">    k := t.RecordKey(recordID, nil)</div><div class="line">    // A new row with current txn-id as lockKey</div><div class="line">    err = txn.Set([]byte(k), []byte(txn.String()))  // recordID的Value是当前的txn-id</div><div class="line">    if err != nil &#123;</div><div class="line">        return 0, err</div><div class="line">    &#125;</div><div class="line">    // column key -&gt; column value</div><div class="line">    for _, c := range t.Cols() &#123;</div><div class="line">        k := t.RecordKey(recordID, c)  // 每一个列都是一个Kev-value, Key跟Column.ID相关</div><div class="line">        if err := t.SetColValue(txn, k, r[c.Offset]); err != nil &#123;</div><div class="line">            return 0, err</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    variable.GetSessionVars(ctx).AddAffectedRows(1)</div><div class="line">    return recordID, nil</div><div class="line">&#125;</div><div class="line"></div><div class="line">...</div><div class="line">func (t *Table) RecordKey(h int64, col *column.Col) []byte &#123;</div><div class="line">    if col != nil &#123;  // Key跟Column.ID相关</div><div class="line">        return util.EncodeRecordKey(t.KeyPrefix(), h, col.ID) </div><div class="line">    &#125;</div><div class="line">    return util.EncodeRecordKey(t.KeyPrefix(), h, 0)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="mysql中的Integer-Types"><a href="#mysql中的Integer-Types" class="headerlink" title="mysql中的Integer Types"></a>mysql中的Integer Types</h3><p><a href="https://dev.mysql.com/doc/refman/5.0/en/integer-types.html" target="_blank" rel="external">mysql doc</a></p>
+<p><img src="http://7xsoeu.com1.z0.glb.clouddn.com/1445931527845.png" alt=""></p>
+<p>MYSQL支持以上的整数类型, 所以Create table的时候跟在INT后面的长度是没用的, 如INT(5), 都是只有4个字节长</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://winkyao.github.io/2016/04/06/tidb笔记2/" data-id="cj2d2p51t000rphnlwki6178x" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/07/golang-vendor/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          golang vendor
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/06/tidb笔记1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">tidb笔记1</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/c-11/" style="font-size: 10px;">c++11</a> <a href="/tags/etcd/" style="font-size: 10px;">etcd</a> <a href="/tags/facebook/" style="font-size: 10px;">facebook</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/haystack/" style="font-size: 10px;">haystack</a> <a href="/tags/paper/" style="font-size: 10px;">paper</a> <a href="/tags/tidb/" style="font-size: 20px;">tidb</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/reboot/">reboot</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/11/haystack/">facebook图片存储之Haystack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/10/etcd-client-DNS-Discovery/">etcd client DNS Discovery</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/07/golang-vendor/">golang vendor</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/06/tidb笔记2/">tidb笔记2</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 wink<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

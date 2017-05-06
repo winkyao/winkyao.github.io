@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>golang vendor | 技术之大, 在乎你我心中</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="golang vendor是为了解决golang依赖的问题的, 因为golang的依赖都是以源码的形式存在的, 所以如果别的项目变更了API, 这个时候很有可能会让你的代码无法通过编译. 在vendor出来之前, 一般都是用godep来解决的, godep是把这些依赖的源代码复制到当前的Godeps目录, 然后go build 变成 godep go build godep算是一个妥协的产物, 但">
+<meta name="keywords" content="golang">
+<meta property="og:type" content="article">
+<meta property="og:title" content="golang vendor">
+<meta property="og:url" content="http://winkyao.github.io/2016/04/07/golang-vendor/index.html">
+<meta property="og:site_name" content="技术之大, 在乎你我心中">
+<meta property="og:description" content="golang vendor是为了解决golang依赖的问题的, 因为golang的依赖都是以源码的形式存在的, 所以如果别的项目变更了API, 这个时候很有可能会让你的代码无法通过编译. 在vendor出来之前, 一般都是用godep来解决的, godep是把这些依赖的源代码复制到当前的Godeps目录, 然后go build 变成 godep go build godep算是一个妥协的产物, 但">
+<meta property="og:updated_time" content="2017-05-06T09:34:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="golang vendor">
+<meta name="twitter:description" content="golang vendor是为了解决golang依赖的问题的, 因为golang的依赖都是以源码的形式存在的, 所以如果别的项目变更了API, 这个时候很有可能会让你的代码无法通过编译. 在vendor出来之前, 一般都是用godep来解决的, godep是把这些依赖的源代码复制到当前的Godeps目录, 然后go build 变成 godep go build godep算是一个妥协的产物, 但">
+  
+    <link rel="alternate" href="/atom.xml" title="技术之大, 在乎你我心中" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">技术之大, 在乎你我心中</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-golang-vendor" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/07/golang-vendor/" class="article-date">
+  <time datetime="2016-04-07T07:16:03.000Z" itemprop="datePublished">2016-04-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/tech/">tech</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      golang vendor
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>golang vendor是为了解决golang依赖的问题的, 因为golang的依赖都是以源码的形式存在的, 所以如果别的项目变更了API, 这个时候很有可能会让你的代码无法通过编译. 在vendor出来之前, 一般都是用godep来解决的, godep是把这些依赖的源代码复制到当前的Godeps目录, 然后<code>go build 变成 godep go build</code></p>
+<p>godep算是一个妥协的产物, 但它毕竟更改了go build的原义, 所以这个方案还是不够满意, 所以vendor来了.  go1.5需要通过<code>GO15VENDOREXPERIMENT=1</code>环境变量开启, go1.6默认开启</p>
+<a id="more"></a>
+<h3 id="golang文档是这样说的"><a href="#golang文档是这样说的" class="headerlink" title="golang文档是这样说的:"></a>golang文档是这样说的:</h3><p>Go 1.6 includes support for using local copies of external dependencies to satisfy imports of those dependencies, often referred to as vendoring.</p>
+<p>Code below a directory named “vendor” is importable only by code in the directory tree rooted at the parent of “vendor”, and only using an import path that omits the prefix up to and including the vendor element.</p>
+<p>Here’s the example from the previous section, but with the “internal” directory renamed to “vendor” and a new foo/vendor/crash/bang directory added:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/home/user/gocode/</div><div class="line">    src/</div><div class="line">        crash/</div><div class="line">            bang/              (go code in package bang)</div><div class="line">                b.go</div><div class="line">        foo/                   (go code in package foo)</div><div class="line">            f.go</div><div class="line">            bar/               (go code in package bar)</div><div class="line">                x.go</div><div class="line">            vendor/</div><div class="line">                crash/</div><div class="line">                    bang/      (go code in package bang)</div><div class="line">                        b.go</div><div class="line">                baz/           (go code in package baz)</div><div class="line">                    z.go</div><div class="line">            quux/              (go code in package main)</div><div class="line">                y.go</div></pre></td></tr></table></figure>
+<p>The same visibility rules apply as for internal, but the code in z.go is imported as “baz”, not as “foo/vendor/baz”.</p>
+<p>Code in vendor directories deeper in the source tree shadows code in higher directories. Within the subtree rooted at foo, an import of “crash/bang” resolves to “foo/vendor/crash/bang”, not the top-level “crash/bang”.</p>
+<p>Code in vendor directories is not subject to import path checking (see ‘go help importpath’).</p>
+<p>When ‘go get’ checks out or updates a git repository, it now also updates submodules.</p>
+<p>Vendor directories do not affect the placement of new repositories being checked out for the first time by ‘go get’: those are always placed in the main GOPATH, never in a vendor subtree.</p>
+<p>In Go 1.5, as an experiment, setting the environment variable GO15VENDOREXPERIMENT=1 enabled these features. As of Go 1.6 they are on by default. To turn them off, set GO15VENDOREXPERIMENT=0. In Go 1.7, the environment variable will stop having any effect.</p>
+<p>See <a href="https://golang.org/s/go15vendor" target="_blank" rel="external">https://golang.org/s/go15vendor</a> for details.</p>
+<h3 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h3><p>假设有如下的目录:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">./main.go</div><div class="line">./vendor</div><div class="line">./vendor/a</div><div class="line">./vendor/a/a.go</div><div class="line">./vendor/b</div><div class="line">./vendor/b/b.go</div><div class="line">./vendor/c</div><div class="line">./vendor/c/c.go</div><div class="line">./vendor/c/vendor</div><div class="line">./vendor/c/vendor/a</div><div class="line">./vendor/c/vendor/a/a.go</div></pre></td></tr></table></figure>
+<p>main.go 内容如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">package main</div><div class="line"></div><div class="line">import (</div><div class="line"> &quot;a&quot;</div><div class="line"> &quot;b&quot;</div><div class="line"> &quot;c&quot;</div><div class="line"> &quot;fmt&quot;</div><div class="line">)</div><div class="line"></div><div class="line">func main() &#123;</div><div class="line"> fmt.Println(&quot;main.main()&quot;)</div><div class="line"> fmt.Println(&quot;main: a.A ==&quot;, a.A)</div><div class="line"> fmt.Println(&quot;main: a.Inc() ==&quot;, a.Inc())</div><div class="line"> fmt.Println(&quot;main: b.B ==&quot;, b.B)</div><div class="line"> fmt.Println(&quot;main: c.C ==&quot;, c.C)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>vendor/a/a.go 如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">package a</div><div class="line"></div><div class="line">import &quot;fmt&quot;</div><div class="line"></div><div class="line">var A = 1</div><div class="line"></div><div class="line">func Inc() int &#123;</div><div class="line"> A++</div><div class="line"> return A</div><div class="line">&#125;</div><div class="line"></div><div class="line">func init() &#123;</div><div class="line"> fmt.Println(&quot;Init package a&quot;)</div><div class="line"> fmt.Println(&quot;a: A ==&quot;, A)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>vendor/b/b.go looks like:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">package b</div><div class="line"></div><div class="line">import &quot;a&quot;</div><div class="line">import &quot;fmt&quot;</div><div class="line"></div><div class="line">var B = 2</div><div class="line"></div><div class="line">func init() &#123;</div><div class="line"> fmt.Println(&quot;Init package b&quot;)</div><div class="line"> fmt.Println(&quot;b: a.A ==&quot;, a.A)</div><div class="line"> fmt.Println(&quot;b: a.Inc() ==&quot;, a.Inc())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>vendor/c/c.go looks like:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">package c</div><div class="line"></div><div class="line">import &quot;a&quot;</div><div class="line">import &quot;fmt&quot;</div><div class="line"></div><div class="line">var C = 3</div><div class="line"></div><div class="line">func init() &#123;</div><div class="line"> fmt.Println(&quot;Init package c&quot;)</div><div class="line"> fmt.Println(&quot;c: C ==&quot;, C)</div><div class="line"> fmt.Println(&quot;c: a.A ==&quot;, a.A)</div><div class="line"> fmt.Println(&quot;c: a.Inc() ==&quot;, a.Inc())</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最后 vendor/c/vendor/a/a.go looks like:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">package a</div><div class="line"></div><div class="line">import &quot;fmt&quot;</div><div class="line"></div><div class="line">var A = 100</div><div class="line"></div><div class="line">func Inc() int &#123;</div><div class="line"> A++</div><div class="line"> return A</div><div class="line">&#125;</div><div class="line"></div><div class="line">func init() &#123;</div><div class="line"> fmt.Println(&quot;Init c/vendor/a&quot;)</div><div class="line"> fmt.Println(&quot;c/vendor/a: A ==&quot;, A)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果不带上vendor特性, 运行main.go, 你会得到:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$ go run main.go</div><div class="line">main.go:4:2: cannot find package “a” in any of:</div><div class="line"> /usr/local/go/src/a (from $GOROOT)</div><div class="line"> /Users/emuller/go/src/a (from $GOPATH)</div><div class="line">main.go:5:2: cannot find package “b” in any of:</div><div class="line"> /usr/local/go/src/b (from $GOROOT)</div><div class="line"> /Users/emuller/go/src/b (from $GOPATH)</div><div class="line">main.go:6:2: cannot find package “c” in any of:</div><div class="line"> /usr/local/go/src/c (from $GOROOT)</div><div class="line"> /Users/emuller/go/src/c (from $GOPATH)</div></pre></td></tr></table></figure></p>
+<p>但是如果开启vendor:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">$ GO15VENDOREXPERIMENT=1 go run main.go</div><div class="line">Init package a</div><div class="line">a: A == 1</div><div class="line">Init package b</div><div class="line">b: a.A == 1</div><div class="line">b: a.Inc() == 2</div><div class="line">Init c/vendor/a</div><div class="line">c/vendor/a: A == 100</div><div class="line">Init package c</div><div class="line">c: C == 3</div><div class="line">c: a.A == 100</div><div class="line">c: a.Inc() == 101</div><div class="line">main.main()</div><div class="line">main: a.A == 2</div><div class="line">main: a.Inc() == 3</div><div class="line">main: b.B == 2</div><div class="line">main: c.C == 3</div></pre></td></tr></table></figure></p>
+<p>总结一下就是, b和main都会使用<code>vendor/a</code>包, 而c本身会使用它自己的vendor, <code>vendor/c/vendor/a</code></p>
+<h3 id="那怎么保存我的依赖到vendor目录呢"><a href="#那怎么保存我的依赖到vendor目录呢" class="headerlink" title="那怎么保存我的依赖到vendor目录呢?"></a>那怎么保存我的依赖到vendor目录呢?</h3><p>官方并没有提供这种工具, 显然是要我们自己来处理了, 我们可以用这个工具<a href="https://github.com/kardianos/govendor" target="_blank" rel="external">https://github.com/kardianos/govendor</a>就可以啦</p>
+<h4 id="govendor-Quick-Start"><a href="#govendor-Quick-Start" class="headerlink" title="govendor Quick Start"></a>govendor Quick Start</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"># Setup your project.</div><div class="line">cd &quot;my project in GOPATH&quot;</div><div class="line">govendor init</div><div class="line"></div><div class="line"># Add existing GOPATH files to vendor.</div><div class="line"># 执行完这一步, 就会把我们的依赖package复制一份到vendor目录了</div><div class="line">govendor add +external</div><div class="line"></div><div class="line"># View your work.</div><div class="line">govendor list</div><div class="line"></div><div class="line"># Look at what is using a package</div><div class="line">govendor list -v fmt</div><div class="line"></div><div class="line"># Specify a specific version or revision to fetch</div><div class="line">govendor fetch golang.org/x/net/context@a4bbce9fcae005b22ae5443f6af064d80a6f5a55</div><div class="line">govendor fetch golang.org/x/net/context@v1   # Get latest v1.*.* tag or branch.</div><div class="line">govendor fetch golang.org/x/net/context@=v1  # Get the tag or branch named &quot;v1&quot;.</div><div class="line"></div><div class="line"># Update a package to latest, given any prior version constraint</div><div class="line">govendor fetch golang.org/x/net/context</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://winkyao.github.io/2016/04/07/golang-vendor/" data-id="cj2d2p51f0009phnld14k5x8x" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/10/etcd-client-DNS-Discovery/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          etcd client DNS Discovery
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/06/tidb笔记2/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">tidb笔记2</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/c-11/" style="font-size: 10px;">c++11</a> <a href="/tags/etcd/" style="font-size: 10px;">etcd</a> <a href="/tags/facebook/" style="font-size: 10px;">facebook</a> <a href="/tags/golang/" style="font-size: 10px;">golang</a> <a href="/tags/haystack/" style="font-size: 10px;">haystack</a> <a href="/tags/paper/" style="font-size: 10px;">paper</a> <a href="/tags/tidb/" style="font-size: 20px;">tidb</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/05/06/reboot/">reboot</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/11/haystack/">facebook图片存储之Haystack</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/10/etcd-client-DNS-Discovery/">etcd client DNS Discovery</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/07/golang-vendor/">golang vendor</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/06/tidb笔记2/">tidb笔记2</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 wink<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
