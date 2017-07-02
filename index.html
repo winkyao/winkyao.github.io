@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://winkyao.github.io"></form>
@@ -88,7 +88,7 @@
 <p>那么什么是优秀的程序员? 我想大概是在业内有一定知名度, 能独挡一面, 坚持coding的吧. 几年后回来广州, 他问我, 你现在已经是一个优秀的程序员了吧? </p>
 <p>我笑说, 还差的很远. 其实有很多时候, 我甚至都已经忘记了自己的这个理想.</p>
 <p>在360的时候, 因为负责Atlas, 所以我一直在思考, MYSQL中间件的未来是什么? 大概youtube/vitess或许是走到头了吧? 然而vitess依然无法令人满意, 分布式事务, 复杂语句都没办法很好的支撑, 中间件的方案, 包括Atlas, TDDL, 其实, 都是一种中间过渡的产品, 业务如果需要无感知的扩展MYSQL, 其实还是没有办法. 当时我认定MYSQL中间件的方案已经是头, 后来我就在想, 既然nosql有这么好的扩展性, 关系型数据库又有这么好的数据表达能力, 这两者会不会有一个兼得两者的系统?</p>
-<h3 id="NEWSQL"><a href="#NEWSQL" class="headerlink" title="NEWSQL"></a>NEWSQL</h3><p>当时Google有几篇论文, Spanner, F1提到了他们内部的解决方案, 这也是后来被业界称为NEWSQL, 然后我找到了两个开源的实现<a href="https://github.com/pingcap/tidb" target="_blank" rel="external">PingCAP/TiDB</a>, <a href="https://github.com/cockroachdb/cockroach" target="_blank" rel="external">CockroachDB</a>, TiDB兼容MYSQL protocol, 而CockroachDB兼容PostgreSQL. 很显然, TiDB引起了我的注意, 当时它还只是一个上层的sql proxy, 底下的存储TiKV还没有. 当时我觉得这就是未来MYSQL该有的样子啊. 我毫不犹豫的研究它, 给他们提issue, 改bug, 提PR, 但是, 很遗憾的是, 360的同事领导们都不认同这个当时还看不到未来的分布式数据库. 我对它的研究就此搁浅. 很让人欣慰的是, TiDB在短短不到两年的时间, 已经做到了rc2了, 线上用户也已经陆陆续续开始使用起来.</p>
+<h3 id="NEWSQL"><a href="#NEWSQL" class="headerlink" title="NEWSQL"></a>NEWSQL</h3><p>当时Google有几篇论文, Spanner, F1提到了他们内部的解决方案, 这也是后来被业界称为NEWSQL, 然后我找到了两个开源的实现<a href="https://github.com/pingcap/tidb" target="_blank" rel="external">PingCAP/TiDB</a>, <a href="https://github.com/cockroachdb/cockroach" target="_blank" rel="external">CockroachDB</a>, TiDB兼容MYSQL protocol, 而CockroachDB兼容PostgreSQL. 很显然, TiDB引起了我的注意, 当时它还只是一个上层的sql layer, 底下的存储TiKV还没有. 当时我觉得这就是未来MYSQL该有的样子啊. 我毫不犹豫的研究它, 给他们提issue, 改bug, 提PR, 但是, 很遗憾的是, 360的同事领导们都不认同这个当时还看不到未来的分布式数据库. 我对它的研究就此搁浅. 很让人欣慰的是, TiDB在短短不到两年的时间, 已经做到了rc2了, 线上用户也已经陆陆续续开始使用起来.</p>
 <p>是的, 我相信TiDB就是未来MYSQL的样子, 这也是我一直以来的心结, 现在, 我也准备加入他们, 完成这个令人兴奋的事情.</p>
 <h3 id="告别"><a href="#告别" class="headerlink" title="告别"></a>告别</h3><p>其实这次选择, 令我犹豫不决, 其实最大的原因还是因为现在我的老大, 纳皮, 一年前在360, 我已经在北京漂了三年, 从一开始去北京, 就想好了以后是一定会回来广东的, 刚好一年前奶奶去世, 爸爸很伤心, 看着逐渐老去的父母, 我决定回家, 感谢当时纳皮对我的赏识, 这一年中, 他教会了我很多非技术的东西, 我对他充满了愧疚和感恩, 这种感情非常非常复杂, 一方面, 我很希望能用我的能力帮助他, 然而一方面又是我很向往的领域. 在心里纠结了两个多月之后, 我终于在昨晚跟他提出了我要走的想法. 感谢纳皮, 感谢阿里, 感谢纳皮的栽培. </p>
 <p>有缘, 我们江湖再见.</p>
@@ -96,7 +96,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2017/05/06/reboot/" data-id="cj2d4e8hy000d8cnl7hkxx93u" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2017/05/06/reboot/" data-id="cj2d4e8hy000d8cnl7hkxx93u" class="article-share-link">Delen</a>
       
       
     </footer>
@@ -146,7 +146,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2016/04/11/haystack/" data-id="cj2d4e8i6000l8cnlxtkpkrbz" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2016/04/11/haystack/" data-id="cj2d4e8i6000l8cnlxtkpkrbz" class="article-share-link">Delen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/facebook/">facebook</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/haystack/">haystack</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/paper/">paper</a></li></ul>
@@ -198,7 +198,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2016/04/10/etcd-client-DNS-Discovery/" data-id="cj2d4e8hv00058cnlztbtlct2" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2016/04/10/etcd-client-DNS-Discovery/" data-id="cj2d4e8hv00058cnlztbtlct2" class="article-share-link">Delen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/etcd/">etcd</a></li></ul>
@@ -246,7 +246,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2016/04/07/golang-vendor/" data-id="cj2d4e8hx00098cnlms7ox1rm" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2016/04/07/golang-vendor/" data-id="cj2d4e8hx00098cnlms7ox1rm" class="article-share-link">Delen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/golang/">golang</a></li></ul>
@@ -293,7 +293,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2016/04/06/tidb笔记2/" data-id="cj2d4e8i3000i8cnl8ymcs13a" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2016/04/06/tidb笔记2/" data-id="cj2d4e8i3000i8cnl8ymcs13a" class="article-share-link">Delen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
@@ -342,7 +342,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2016/04/06/tidb笔记1/" data-id="cj2d4e8i0000e8cnla68mx37y" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2016/04/06/tidb笔记1/" data-id="cj2d4e8i0000e8cnla68mx37y" class="article-share-link">Delen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
@@ -390,7 +390,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://winkyao.github.io/2016/04/06/c-11-笔记/" data-id="cj2d4e8hn00008cnl4p0rblv7" class="article-share-link">Share</a>
+      <a data-url="http://winkyao.github.io/2016/04/06/c-11-笔记/" data-id="cj2d4e8hn00008cnl4p0rblv7" class="article-share-link">Delen</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c-11/">c++11</a></li></ul>
@@ -409,7 +409,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Categories</h3>
+    <h3 class="widget-title">Categorieën</h3>
     <div class="widget">
       <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/tech/">tech</a></li></ul>
     </div>
@@ -419,7 +419,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
+    <h3 class="widget-title">Labels</h3>
     <div class="widget">
       <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/c-11/">c++11</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/etcd/">etcd</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/facebook/">facebook</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/golang/">golang</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/haystack/">haystack</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/paper/">paper</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/tidb/">tidb</a></li></ul>
     </div>
@@ -438,7 +438,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archieven</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/05/">May 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">April 2016</a></li></ul>
     </div>
@@ -448,7 +448,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Recente berichten</h3>
     <div class="widget">
       <ul>
         
