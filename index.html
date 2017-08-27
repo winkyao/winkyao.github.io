@@ -131,6 +131,72 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-time-wheel" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/28/time-wheel/">time wheel来实现一个定时器</a>
+    </h1>
+  
+
+        
+        <a href="/2017/08/28/time-wheel/" class="archive-article-date">
+  	<time datetime="2017-08-27T16:22:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-28</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="时间轮"><a href="#时间轮" class="headerlink" title="时间轮"></a>时间轮</h3><p><img src="/2017/08/28/time-wheel/time-wheel.jpeg" alt="time-wheel"></p>
+<p>只需要启动一个定时器, 这个定时器就跟时钟一样转动, 一次只会跳动一个固定的时间, 我们叫做tick, 假设这个tick为1s, 如果一轮的槽数为60, 那就跟现实生活中的时钟没什么两样.</p>
+<p>只需要把定时任务加入到相应过期时间的槽当中, 比方说当前指针指向的位置为pos, 那么要在3秒后过期一个任务, 只需要在下标为<code>pos+3</code>的槽中挂上这个定时任务即可, 当指针按频率转动到该槽的时候, 这个槽上的所有任务都被通知过期. 这样也就实现了一个timer实现多个定时任务的功能, 往往在服务端中, 可以节省大量的CPU.</p>
+<p>具体的实现可以看看<a href="https://github.com/siddontang/go/blob/master/timingwheel/timingwheel.go" target="_blank" rel="external">这里</a> </p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/08/28/time-wheel/">more >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-PingCAP-campus-recruiting" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
