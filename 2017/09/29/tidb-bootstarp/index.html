@@ -6,17 +6,17 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://winkyao.github.io">
-  <title>tidb-bootstarp | winkyao.com</title>
+  <title>TiDB 源码分析之 Bootstrap | winkyao.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="BootstrapTiDB的Bootstrap是启动的时候的初始化过程, 由session.go: BootstrapSession完成. 在 tidb-server/main.go 的 createStoreAndDomain 被调用  bootstrap 分为两种, 它首先会去查看 tikv 中的  BootstrapKey, 取得当前的bootstapVersion, 如果为0, 那么就是新">
 <meta property="og:type" content="article">
-<meta property="og:title" content="tidb-bootstarp">
+<meta property="og:title" content="TiDB 源码分析之 Bootstrap">
 <meta property="og:url" content="http://winkyao.github.io/2017/09/29/tidb-bootstarp/index.html">
 <meta property="og:site_name" content="winkyao.com">
 <meta property="og:description" content="BootstrapTiDB的Bootstrap是启动的时候的初始化过程, 由session.go: BootstrapSession完成. 在 tidb-server/main.go 的 createStoreAndDomain 被调用  bootstrap 分为两种, 它首先会去查看 tikv 中的  BootstrapKey, 取得当前的bootstapVersion, 如果为0, 那么就是新">
-<meta property="og:updated_time" content="2017-09-29T09:50:49.000Z">
+<meta property="og:updated_time" content="2017-09-29T09:52:54.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="tidb-bootstarp">
+<meta name="twitter:title" content="TiDB 源码分析之 Bootstrap">
 <meta name="twitter:description" content="BootstrapTiDB的Bootstrap是启动的时候的初始化过程, 由session.go: BootstrapSession完成. 在 tidb-server/main.go 的 createStoreAndDomain 被调用  bootstrap 分为两种, 它首先会去查看 tikv 中的  BootstrapKey, 取得当前的bootstapVersion, 如果为0, 那么就是新">
   
     <link rel="alternative" href="/atom.xml" title="winkyao.com" type="application/atom+xml">
@@ -140,7 +140,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      tidb-bootstarp
+      TiDB 源码分析之 Bootstrap
     </h1>
   
 
