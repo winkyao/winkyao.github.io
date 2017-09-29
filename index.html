@@ -131,6 +131,90 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-tidb-bootstarp" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/29/tidb-bootstarp/">tidb-bootstarp</a>
+    </h1>
+  
+
+        
+        <a href="/2017/09/29/tidb-bootstarp/" class="archive-article-date">
+  	<time datetime="2017-09-29T09:49:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-29</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Bootstrap"><a href="#Bootstrap" class="headerlink" title="Bootstrap"></a>Bootstrap</h1><p>TiDB的Bootstrap是启动的时候的初始化过程, 由<code>session.go: BootstrapSession</code>完成.</p>
+<p>在 tidb-server/main.go 的 <code>createStoreAndDomain</code> 被调用 </p>
+<p>bootstrap 分为两种, 它首先会去查看 tikv 中的  <code>BootstrapKey</code>, 取得当前的bootstapVersion, 如果为0, 那么就是新集群, 作 bootstrap, 如果低于 <code>currentBootstrapVersion</code>, 那么就做 <code>upgrade</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">func BootstrapSession(store kv.Storage) (*domain.Domain, error) &#123;</div><div class="line">ver := getStoreBootstrapVersion(store)</div><div class="line">	if ver == notBootstrapped &#123;</div><div class="line">		runInBootstrapSession(store, bootstrap)</div><div class="line">	&#125; else if ver &lt; currentBootstrapVersion &#123;</div><div class="line">		runInBootstrapSession(store, upgrade)</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	...</div></pre></td></tr></table></figure>
+<p>bootstap:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">// bootstrap initiates system DB for a store.</div><div class="line">func bootstrap(s Session) &#123;</div><div class="line">	b, err := checkBootstrapped(s)</div><div class="line">	if err != nil &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">	if b &#123;</div><div class="line">		upgrade(s)</div><div class="line">		return</div><div class="line">	&#125;</div><div class="line">	doDDLWorks(s)  // 创建一些系统表</div><div class="line">	doDMLWorks(s)  // 插入一下元数据到系统表</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>upgrade:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">func upgrade(s Session) &#123;</div><div class="line">	ver, err := getBootstrapVersion(s)</div><div class="line">	if err != nil &#123;</div><div class="line">		log.Fatal(errors.Trace(err))</div><div class="line">	&#125;</div><div class="line">	if ver &gt;= currentBootstrapVersion &#123;</div><div class="line">		// It is already bootstrapped/upgraded by a higher version TiDB server.</div><div class="line">		return</div><div class="line">	&#125;</div><div class="line">	...</div><div class="line">	if ver &lt; version15 &#123;</div><div class="line">		upgradeToVer15(s) // 例如这里创建了mysql.gc_delete_range </div><div class="line">	&#125;</div><div class="line">	...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="sysvar"><a href="#sysvar" class="headerlink" title="sysvar"></a>sysvar</h4><p>所有系统的变量, 都定义在在 sysvar.go 中的 <code>defaultSysVars</code>, 在 init 里面设置到了 <code>SysVars</code> map中</p>
+<p>在 doDMLWorks 时, 会逐一插入到 <code>mysql.GLOBAL_VARIABLES</code> 表中</p>
+<h4 id="LoadPrivilegeLoop"><a href="#LoadPrivilegeLoop" class="headerlink" title="LoadPrivilegeLoop"></a>LoadPrivilegeLoop</h4><p>因为 TiDB 是分布式的, 所以在 TiDB 中的 privilege 可能被其他的 TiDB 修改了, 所以 TiDB 使用了 etcd, 在 更改了 privilege 的时候通知所有的tidb 去 load 新的 priilege.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">// LoadPrivilegeLoop create a goroutine loads privilege tables in a loop, it</div><div class="line">// should be called only once in BootstrapSession.</div><div class="line">func (do *Domain) LoadPrivilegeLoop(ctx context.Context) error &#123;</div><div class="line">	ctx.GetSessionVars().InRestrictedSQL = true</div><div class="line">	do.privHandle = privileges.NewHandle()</div><div class="line">	err := do.privHandle.Update(ctx) </div><div class="line">	if err != nil &#123;</div><div class="line">		return errors.Trace(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	var watchCh clientv3.WatchChan</div><div class="line">	duration := 5 * time.Minute</div><div class="line">	if do.etcdClient != nil &#123;</div><div class="line">		watchCh = do.etcdClient.Watch(goctx.Background(), privilegeKey)</div><div class="line">		duration = 10 * time.Minute</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	go func() &#123;</div><div class="line">		var count int</div><div class="line">		for &#123;</div><div class="line">			ok := true</div><div class="line">			select &#123;</div><div class="line">			case &lt;-do.exit:</div><div class="line">				return</div><div class="line">			case _, ok = &lt;-watchCh:</div><div class="line">			case &lt;-time.After(duration):</div><div class="line">			&#125;</div><div class="line">			if !ok &#123;</div><div class="line">				log.Error(&quot;[domain] load privilege loop watch channel closed.&quot;)</div><div class="line">				watchCh = do.etcdClient.Watch(goctx.Background(), privilegeKey)</div><div class="line">				count++</div><div class="line">				if count &gt; 10 &#123;</div><div class="line">					time.Sleep(time.Duration(count) * time.Second)</div><div class="line">				&#125;</div><div class="line">				continue</div><div class="line">			&#125;</div><div class="line"></div><div class="line">			count = 0</div><div class="line">			err := do.privHandle.Update(ctx)  // 这里会更新所有的 priv 到内存</div><div class="line">			if err != nil &#123;</div><div class="line">				log.Error(&quot;[domain] load privilege fail:&quot;, errors.ErrorStack(err))</div><div class="line">			&#125; else &#123;</div><div class="line">				log.Info(&quot;[domain] reload privilege success.&quot;)</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">	return nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="UpdateTableStatsLoop"><a href="#UpdateTableStatsLoop" class="headerlink" title="UpdateTableStatsLoop"></a>UpdateTableStatsLoop</h4><p>用来做 Analyze 的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">// UpdateTableStatsLoop creates a goroutine loads stats info and updates stats info in a loop.</div><div class="line">// It will also start a goroutine to analyze tables automatically.</div><div class="line">// It should be called only once in BootstrapSession.</div><div class="line">func (do *Domain) UpdateTableStatsLoop(ctx context.Context) error &#123;</div><div class="line">	ctx.GetSessionVars().InRestrictedSQL = true</div><div class="line">	statsHandle := statistics.NewHandle(ctx, do.statsLease)</div><div class="line">	atomic.StorePointer(&amp;do.statsHandle, unsafe.Pointer(statsHandle))</div><div class="line">	do.ddl.RegisterEventCh(statsHandle.DDLEventCh())</div><div class="line">	err := statsHandle.Update(do.InfoSchema())</div><div class="line">	if err != nil &#123;</div><div class="line">		return errors.Trace(err)</div><div class="line">	&#125;</div><div class="line">	lease := do.statsLease</div><div class="line">	if lease &lt;= 0 &#123;</div><div class="line">		return nil</div><div class="line">	&#125;</div><div class="line">	do.wg.Add(1)</div><div class="line">	go do.updateStatsWorker(ctx, lease)</div><div class="line">	if RunAutoAnalyze &#123;</div><div class="line">		do.wg.Add(1)</div><div class="line">		go do.autoAnalyzeWorker(lease)</div><div class="line">	&#125;</div><div class="line">	return nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="GCWorker"><a href="#GCWorker" class="headerlink" title="GCWorker"></a>GCWorker</h3><p>GCWorker 也是在 BootstrapSession 被启动:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">if raw, ok := store.(domain.EtcdBackend); ok &#123;</div><div class="line">	err = raw.StartGCWorker()</div><div class="line">	if err != nil &#123;</div><div class="line">		return nil, errors.Trace(err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>GCWorker 主要做以下3件事情:</p>
+<ol>
+<li>DDL的DropTable, DropIndex等的Delete range操作</li>
+<li>tikv GC, 基于lifetime来清理保存的历史数据<a href="https://pingcap.com/doc-history-read-zh" target="_blank" rel="external">TiDB 读取历史版本数据</a></li>
+<li>扫描全库, 查找过期的Locks.</li>
+</ol>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2017/09/29/tidb-bootstarp/">more >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-golang-build" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -923,94 +1007,10 @@
 
 
   
-    <article id="post-c-11-笔记" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/04/06/c-11-笔记/">c++11 笔记</a>
-    </h1>
-  
-
-        
-        <a href="/2016/04/06/c-11-笔记/" class="archive-article-date">
-  	<time datetime="2016-04-06T07:01:08.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-06</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="C-11-笔记"><a href="#C-11-笔记" class="headerlink" title="C++ 11 笔记"></a>C++ 11 笔记</h2><h4 id="constexpr-表达式"><a href="#constexpr-表达式" class="headerlink" title="constexpr 表达式"></a>constexpr 表达式</h4><p>常量表达式是指值不会改变并且在编译过程就能得到计算结果的表达式.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">constexpr int mf = 20;</div><div class="line">constexpr int limit = mf + 1;</div><div class="line">constexpr int sz = size(); // 只有当size是一个constexpr函数时, 才是一条正确的声明语句</div></pre></td></tr></table></figure>
-        
-          <a class="article-more-a" href="/2016/04/06/c-11-笔记/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">c++11</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/tech/" class="article-tag-list-link color5">tech</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2016/04/06/c-11-笔记/">more >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 

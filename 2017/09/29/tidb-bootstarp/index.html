@@ -6,14 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://winkyao.github.io">
-  <title>Archives: 2017 | winkyao.com</title>
+  <title>tidb-bootstarp | winkyao.com</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="winkyao.com">
-<meta property="og:url" content="http://winkyao.github.io/archives/2017/index.html">
+  <meta name="description" content="BootstrapTiDB的Bootstrap是启动的时候的初始化过程, 由session.go: BootstrapSession完成. 在 tidb-server/main.go 的 createStoreAndDomain 被调用  bootstrap 分为两种, 它首先会去查看 tikv 中的  BootstrapKey, 取得当前的bootstapVersion, 如果为0, 那么就是新">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tidb-bootstarp">
+<meta property="og:url" content="http://winkyao.github.io/2017/09/29/tidb-bootstarp/index.html">
 <meta property="og:site_name" content="winkyao.com">
+<meta property="og:description" content="BootstrapTiDB的Bootstrap是启动的时候的初始化过程, 由session.go: BootstrapSession完成. 在 tidb-server/main.go 的 createStoreAndDomain 被调用  bootstrap 分为两种, 它首先会去查看 tikv 中的  BootstrapKey, 取得当前的bootstapVersion, 如果为0, 那么就是新">
+<meta property="og:updated_time" content="2017-09-29T09:50:49.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="winkyao.com">
+<meta name="twitter:title" content="tidb-bootstarp">
+<meta name="twitter:description" content="BootstrapTiDB的Bootstrap是启动的时候的初始化过程, 由session.go: BootstrapSession完成. 在 tidb-server/main.go 的 createStoreAndDomain 被调用  bootstrap 分为两种, 它首先会去查看 tikv 中的  BootstrapKey, 取得当前的bootstapVersion, 如果为0, 那么就是新">
   
     <link rel="alternative" href="/atom.xml" title="winkyao.com" type="application/atom+xml">
   
@@ -129,157 +133,175 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-tidb-bootstarp" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      tidb-bootstarp
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/29/tidb-bootstarp/" class="archive-article-date">
+
+        
+        <a href="/2017/09/29/tidb-bootstarp/" class="archive-article-date">
   	<time datetime="2017-09-29T09:49:37.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-29</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/29/tidb-bootstarp/">tidb-bootstarp</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Bootstrap"><a href="#Bootstrap" class="headerlink" title="Bootstrap"></a>Bootstrap</h1><p>TiDB的Bootstrap是启动的时候的初始化过程, 由<code>session.go: BootstrapSession</code>完成.</p>
+<p>在 tidb-server/main.go 的 <code>createStoreAndDomain</code> 被调用 </p>
+<p>bootstrap 分为两种, 它首先会去查看 tikv 中的  <code>BootstrapKey</code>, 取得当前的bootstapVersion, 如果为0, 那么就是新集群, 作 bootstrap, 如果低于 <code>currentBootstrapVersion</code>, 那么就做 <code>upgrade</code>:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">func BootstrapSession(store kv.Storage) (*domain.Domain, error) &#123;</div><div class="line">ver := getStoreBootstrapVersion(store)</div><div class="line">	if ver == notBootstrapped &#123;</div><div class="line">		runInBootstrapSession(store, bootstrap)</div><div class="line">	&#125; else if ver &lt; currentBootstrapVersion &#123;</div><div class="line">		runInBootstrapSession(store, upgrade)</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	...</div></pre></td></tr></table></figure>
+<p>bootstap:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">// bootstrap initiates system DB for a store.</div><div class="line">func bootstrap(s Session) &#123;</div><div class="line">	b, err := checkBootstrapped(s)</div><div class="line">	if err != nil &#123;</div><div class="line">		log.Fatal(err)</div><div class="line">	&#125;</div><div class="line">	if b &#123;</div><div class="line">		upgrade(s)</div><div class="line">		return</div><div class="line">	&#125;</div><div class="line">	doDDLWorks(s)  // 创建一些系统表</div><div class="line">	doDMLWorks(s)  // 插入一下元数据到系统表</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>upgrade:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">func upgrade(s Session) &#123;</div><div class="line">	ver, err := getBootstrapVersion(s)</div><div class="line">	if err != nil &#123;</div><div class="line">		log.Fatal(errors.Trace(err))</div><div class="line">	&#125;</div><div class="line">	if ver &gt;= currentBootstrapVersion &#123;</div><div class="line">		// It is already bootstrapped/upgraded by a higher version TiDB server.</div><div class="line">		return</div><div class="line">	&#125;</div><div class="line">	...</div><div class="line">	if ver &lt; version15 &#123;</div><div class="line">		upgradeToVer15(s) // 例如这里创建了mysql.gc_delete_range </div><div class="line">	&#125;</div><div class="line">	...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="sysvar"><a href="#sysvar" class="headerlink" title="sysvar"></a>sysvar</h4><p>所有系统的变量, 都定义在在 sysvar.go 中的 <code>defaultSysVars</code>, 在 init 里面设置到了 <code>SysVars</code> map中</p>
+<p>在 doDMLWorks 时, 会逐一插入到 <code>mysql.GLOBAL_VARIABLES</code> 表中</p>
+<h4 id="LoadPrivilegeLoop"><a href="#LoadPrivilegeLoop" class="headerlink" title="LoadPrivilegeLoop"></a>LoadPrivilegeLoop</h4><p>因为 TiDB 是分布式的, 所以在 TiDB 中的 privilege 可能被其他的 TiDB 修改了, 所以 TiDB 使用了 etcd, 在 更改了 privilege 的时候通知所有的tidb 去 load 新的 priilege.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">// LoadPrivilegeLoop create a goroutine loads privilege tables in a loop, it</div><div class="line">// should be called only once in BootstrapSession.</div><div class="line">func (do *Domain) LoadPrivilegeLoop(ctx context.Context) error &#123;</div><div class="line">	ctx.GetSessionVars().InRestrictedSQL = true</div><div class="line">	do.privHandle = privileges.NewHandle()</div><div class="line">	err := do.privHandle.Update(ctx) </div><div class="line">	if err != nil &#123;</div><div class="line">		return errors.Trace(err)</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	var watchCh clientv3.WatchChan</div><div class="line">	duration := 5 * time.Minute</div><div class="line">	if do.etcdClient != nil &#123;</div><div class="line">		watchCh = do.etcdClient.Watch(goctx.Background(), privilegeKey)</div><div class="line">		duration = 10 * time.Minute</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	go func() &#123;</div><div class="line">		var count int</div><div class="line">		for &#123;</div><div class="line">			ok := true</div><div class="line">			select &#123;</div><div class="line">			case &lt;-do.exit:</div><div class="line">				return</div><div class="line">			case _, ok = &lt;-watchCh:</div><div class="line">			case &lt;-time.After(duration):</div><div class="line">			&#125;</div><div class="line">			if !ok &#123;</div><div class="line">				log.Error(&quot;[domain] load privilege loop watch channel closed.&quot;)</div><div class="line">				watchCh = do.etcdClient.Watch(goctx.Background(), privilegeKey)</div><div class="line">				count++</div><div class="line">				if count &gt; 10 &#123;</div><div class="line">					time.Sleep(time.Duration(count) * time.Second)</div><div class="line">				&#125;</div><div class="line">				continue</div><div class="line">			&#125;</div><div class="line"></div><div class="line">			count = 0</div><div class="line">			err := do.privHandle.Update(ctx)  // 这里会更新所有的 priv 到内存</div><div class="line">			if err != nil &#123;</div><div class="line">				log.Error(&quot;[domain] load privilege fail:&quot;, errors.ErrorStack(err))</div><div class="line">			&#125; else &#123;</div><div class="line">				log.Info(&quot;[domain] reload privilege success.&quot;)</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;()</div><div class="line">	return nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="UpdateTableStatsLoop"><a href="#UpdateTableStatsLoop" class="headerlink" title="UpdateTableStatsLoop"></a>UpdateTableStatsLoop</h4><p>用来做 Analyze 的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">// UpdateTableStatsLoop creates a goroutine loads stats info and updates stats info in a loop.</div><div class="line">// It will also start a goroutine to analyze tables automatically.</div><div class="line">// It should be called only once in BootstrapSession.</div><div class="line">func (do *Domain) UpdateTableStatsLoop(ctx context.Context) error &#123;</div><div class="line">	ctx.GetSessionVars().InRestrictedSQL = true</div><div class="line">	statsHandle := statistics.NewHandle(ctx, do.statsLease)</div><div class="line">	atomic.StorePointer(&amp;do.statsHandle, unsafe.Pointer(statsHandle))</div><div class="line">	do.ddl.RegisterEventCh(statsHandle.DDLEventCh())</div><div class="line">	err := statsHandle.Update(do.InfoSchema())</div><div class="line">	if err != nil &#123;</div><div class="line">		return errors.Trace(err)</div><div class="line">	&#125;</div><div class="line">	lease := do.statsLease</div><div class="line">	if lease &lt;= 0 &#123;</div><div class="line">		return nil</div><div class="line">	&#125;</div><div class="line">	do.wg.Add(1)</div><div class="line">	go do.updateStatsWorker(ctx, lease)</div><div class="line">	if RunAutoAnalyze &#123;</div><div class="line">		do.wg.Add(1)</div><div class="line">		go do.autoAnalyzeWorker(lease)</div><div class="line">	&#125;</div><div class="line">	return nil</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="GCWorker"><a href="#GCWorker" class="headerlink" title="GCWorker"></a>GCWorker</h3><p>GCWorker 也是在 BootstrapSession 被启动:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">if raw, ok := store.(domain.EtcdBackend); ok &#123;</div><div class="line">	err = raw.StartGCWorker()</div><div class="line">	if err != nil &#123;</div><div class="line">		return nil, errors.Trace(err)</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>GCWorker 主要做以下3件事情:</p>
+<ol>
+<li>DDL的DropTable, DropIndex等的Delete range操作</li>
+<li>tikv GC, 基于lifetime来清理保存的历史数据<a href="https://pingcap.com/doc-history-read-zh" target="_blank" rel="external">TiDB 读取历史版本数据</a></li>
+<li>扫描全库, 查找过期的Locks.</li>
+</ol>
 
-        <div class="article-info info-on-right">
-          
-          
+      
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>thanks<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="http://s.jiathis.com/qrcode.php?url=http://winkyao.github.io/2017/09/29/tidb-bootstarp/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/19/golang-build/" class="archive-article-date">
-  	<time datetime="2017-09-19T06:27:02.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-09-19</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2017/09/19/golang-build/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">golang build</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/19/golang-build/">golang build</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/08/28/time-wheel/" class="archive-article-date">
-  	<time datetime="2017-08-27T16:22:05.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/08/28/time-wheel/">time wheel来实现一个定时器</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/08/16/PingCAP-campus-recruiting/" class="archive-article-date">
-  	<time datetime="2017-08-16T11:40:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-08-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/08/16/PingCAP-campus-recruiting/">PingCAP 2018 校园招聘</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/05/06/reboot/" class="archive-article-date">
-  	<time datetime="2017-05-06T09:07:48.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2017-05-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/05/06/reboot/">reboot</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
 
 
           </div>
@@ -302,8 +324,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,
