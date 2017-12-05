@@ -131,6 +131,95 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-tidb笔记1" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/04/06/tidb笔记1/">tidb笔记1</a>
+    </h1>
+  
+
+        
+        <a href="/2016/04/06/tidb笔记1/" class="archive-article-date">
+  	<time datetime="2016-04-06T08:04:42.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2016-04-06</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="tidb笔记1"><a href="#tidb笔记1" class="headerlink" title="tidb笔记1"></a>tidb笔记1</h1><h3 id="语法解析"><a href="#语法解析" class="headerlink" title="语法解析"></a>语法解析</h3><p>tidb的语法解析有一些语句并没有作支持: REPLACE</p>
+<h3 id="go-build-ldflags参数"><a href="#go-build-ldflags参数" class="headerlink" title="go build -ldflags参数"></a>go build -ldflags参数</h3><p>在Makefile中, 有这么一句:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">LDFLAGS += -X &quot;github.com/pingcap/tidb/util/printer.TiDBBuildTS=$(shell date -u &apos;+%Y-%m-%d %I:%M:%S&apos;)&quot;</div><div class="line">LDFLAGS += -X &quot;github.com/pingcap/tidb/util/printer.TiDBGitHash=$(shell git rev-parse HEAD)&quot;</div><div class="line">...</div><div class="line"></div><div class="line">server:</div><div class="line">ifeq ($(TARGET), &quot;&quot;)</div><div class="line">    @cd tidb-server &amp;&amp; $(GO) build -ldflags &apos;$(LDFLAGS)&apos;</div><div class="line">else</div><div class="line">    @cd tidb-server &amp;&amp; $(GO) build -ldflags &apos;$(LDFLAGS)&apos; -o &apos;$(TARGET)&apos;</div><div class="line">endif</div></pre></td></tr></table></figure>
+        
+          <a class="article-more-a" href="/2016/04/06/tidb笔记1/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">tidb</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/tech/" class="article-tag-list-link color5">tech</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2016/04/06/tidb笔记1/">more >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-c-11-笔记" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
